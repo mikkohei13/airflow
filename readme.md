@@ -13,6 +13,20 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
   docker-compose up; docker-compose down;
 
 
+# Todo
+
+- Get data from Airflow variables
+- Persist Airflow db
+- Handle multiple files with pagination
+- Setup Python IDE
+- Setup (unit) testing
+- Setup email notifications
+- Handle iNat api timeout & retries
+- Rewrite conversion with python
+- Push to staging dw
+- Show to colleagues, get feedback
+
+
 # Testing
 
 Basic test
