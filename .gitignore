@@ -1,0 +1,15 @@
+
+OLDs/
+.vscode/
+.directory
+__pycache__/
+*.py[cod]
+
+logs/
+af/
+ownNotes.md
+test-nogit/
+
+# Data
+mongodb-volume/*
+source_audio/*

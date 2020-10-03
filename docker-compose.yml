@@ -1,0 +1,47 @@
+
+# https://towardsdatascience.com/apache-airflow-and-postgresql-with-docker-and-docker-compose-5651766dfa96
+
+version: '3'
+services:
+
+    postgres:
+        container_name: airflow_postgres
+        image: postgres
+        environment:
+            - POSTGRES_USER=airflow
+            - POSTGRES_PASSWORD=airflow
+            - POSTGRES_DB=airflow
+
+    scheduler:
+        container_name: airflow_scheduler
+        image: apache/airflow
+        command: scheduler
+#        restart_policy: # original from example
+#            condition: on-failure
+        restart: always # added by MH
+        depends_on:
+            - postgres
+        env_file:
+            - .env
+        volumes:
+            - ./dags:/opt/airflow/dags
+            - ./logs:/opt/airflow/logs
+
+    webserver:
+        container_name: airflow_webserver
+        image: apache/airflow
+        entrypoint: ./scripts/entrypoint.sh
+#        restart_policy: # original from example
+#            condition: on-failure
+        restart: always # added by MH
+        depends_on:
+            - postgres
+            - scheduler
+        env_file:
+            - .env
+        volumes:
+            - ./dags:/opt/airflow/dags
+            - ./logs:/opt/airflow/logs
+            - ./scripts:/opt/airflow/scripts
+        ports:
+            - "8080:8080"
