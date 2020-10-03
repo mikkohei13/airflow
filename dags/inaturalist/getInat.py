@@ -31,17 +31,12 @@ class getInat():
     return inatResponseDict
 
 
-  def getUpdated(self):
+  def getUpdatedGenerator(self, lastUpdateKey, lastUpdateTime):
     # TODO: Check if time(zone) is correct in Docker.
 
     # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
     now = datetime.datetime.now()
     thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
-
-    # TODO: From Variable
-    lastUpdateKey = 0
-    lastUpdateTime = "2020-10-03T21:00:00+00:00"
-
 
     perPage = 3 # Production value: 100
     maxPages = 3 # Production value: 1000
@@ -56,9 +51,11 @@ class getInat():
       url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
 
       # TODO: If fails, return latest successful id. Then push this to variables.
-      # Option, yield exception with value, then use isinstance to check if it's exception or not. If exception, push t variables and stop.
+      # Yield exception with value, then use isinstance to check if it's exception or not. If exception, push t variables and stop.
       # Check: throwing vs. raising errors
       inatResponseDict = self.getPageFromAPI(url)
+
+      # TODO: update lastUpdateKey as the last get in the response
 
       yield inatResponseDict["results"]
 
