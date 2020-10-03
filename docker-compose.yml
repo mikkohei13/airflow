@@ -11,6 +11,8 @@ services:
             - POSTGRES_USER=airflow
             - POSTGRES_PASSWORD=airflow
             - POSTGRES_DB=airflow
+        volumes:
+            - ./postgres-volume:/var/lib/postgresql/data
 
     scheduler:
         container_name: airflow_scheduler
@@ -45,3 +47,6 @@ services:
             - ./scripts:/opt/airflow/scripts
         ports:
             - "8080:8080"
+
+volumes: 
+    postgres-volume:

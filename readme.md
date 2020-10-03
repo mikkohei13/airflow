@@ -10,6 +10,10 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
   chmod -R 777 logs/
   chmod -R 777 dags/
   chmod -R 777 scripts/
+
+Set environment variables to .env.
+Note that AIRFLOW__CORE__FERNET_KEY and FERNET_KEY have to be must be 32 url-safe base64-encoded bytes. These can be generated with ´openssl rand -base64 32´ 
+
   docker-compose up; docker-compose down;
 
 
@@ -24,6 +28,7 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
 - Handle iNat api timeout & retries
 - Rewrite conversion with python
 - Push to staging dw
+- Setup proper env values, password-protect webserver ui, 
 - Show to colleagues, get feedback
 
 
