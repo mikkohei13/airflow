@@ -19,8 +19,6 @@ Note that AIRFLOW__CORE__FERNET_KEY and FERNET_KEY have to be must be 32 url-saf
 
 # Todo
 
-- Get data from Airflow variables
-- Persist Airflow db
 - Handle multiple files with pagination
 - Setup Python IDE
 - Setup (unit) testing

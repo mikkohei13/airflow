@@ -13,7 +13,6 @@ def printObject(object):
   print(object.__dict__)
 
 
-
 print("Start") 
 
 
@@ -28,12 +27,11 @@ print("MY_VAR:" + airflowVariable_inat_latest_obs_id)
 
 inat = getInat.getInat()
 
+# TODO: This will be used for debugging -> not needed in DAG, only on CLI
 singleObservationDict = inat.getSingle(airflowVariable_inat_latest_obs_id)
 
 
-
 ### CONVERT
-
 
 #print(singleObservationDict)
 
