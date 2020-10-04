@@ -2,7 +2,7 @@
 
 import requests
 import json
-import datetime
+from collections import OrderedDict
 
 
 class getInat():
@@ -20,13 +20,15 @@ class getInat():
     except:
       raise Exception("Error getting data from iNaturalist API")
 
+    # TODO: Find out why slightly too large idAbove returns 200 with zero results, but with much too large returns 400 
     if 200 == inatResponse.status_code:
       print("iNaturalist API responded " + str(inatResponse.status_code))
     else:
       errorCode = str(inatResponse.status_code)
       raise Exception(f"iNaturalist API responded with error {errorCode}")
 
-    inatResponseDict = json.loads(inatResponse.text)
+    # TODO: create ordered dict
+    inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
 
     return inatResponseDict
 
@@ -34,16 +36,12 @@ class getInat():
   def getUpdatedGenerator(self, lastUpdateKey, lastUpdateTime):
     # TODO: Check if time(zone) is correct in Docker.
 
-    # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
-    now = datetime.datetime.now()
-    thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
-
     perPage = 3 # Production value: 100
     maxPages = 3 # Production value: 1000
     page = 0
 
     while page < maxPages:
-      log = "Getting page " + str(page) + " below " + str(maxPages) + " thisUpdateTime " + thisUpdateTime + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime
+      log = "Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime
       print(log)
 
       # TODO: Option to get only nonwilds
@@ -54,25 +52,14 @@ class getInat():
       if debug:
         if page > 0:
           # User broken URI
-          url = "https://apiX.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
+          url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "00&include_new_projects=true"
 
-      # TODO: If fails, return latest successful id. Then push this to variables.
-      # Yield exception with value, then use isinstance to check if it's exception or not. If exception, push to variables and stop.
-      # Check: throwing vs. raising errors
-      try:
         inatResponseDict = self.getPageFromAPI(url)
-      except Exception as e:
-        return e
-      else:
-        yield inatResponseDict["results"]
-      finally:
-        print("Got: " + log)
+        print("Got: " + log + "\n")
         page = page + 1
 
-      # TODO: update lastUpdateKey as the last get in the response
-
-
-
+      # return whole dict
+      yield inatResponseDict
 
 
 
@@ -85,6 +72,7 @@ class getInat():
     if 0 == inatResponseDict["total_results"]:
       raise Exception(f"Zero results from iNaturalist API")
 
+    # TODO: Check should this return the whole dict?
     return inatResponseDict["results"][0]
     
 
