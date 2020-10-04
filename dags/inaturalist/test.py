@@ -11,7 +11,14 @@ lastUpdateKey = 0
 lastUpdateTime = "2020-10-03T21:00:00+00:00"
 
 for multiObservationDict in inat.getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
-  print(str(i))
-  i = i + 1
+  # Untested!
+  if isinstance(multiObservationDict, Exception):
+    raise Exception;
+    break;
+  else:
+    print(str(i))
+    # lastUpdateKey = # get from result
+    # set lastUpdateKey as variable
+    i = i + 1
 #  print(multiObservationDict)
 

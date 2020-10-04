@@ -43,21 +43,34 @@ class getInat():
     page = 0
 
     while page < maxPages:
-      print("Getting page " + str(page) + " below " + str(maxPages) + " thisUpdateTime " + thisUpdateTime + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime)
-      page = page + 1
+      log = "Getting page " + str(page) + " below " + str(maxPages) + " thisUpdateTime " + thisUpdateTime + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime
+      print(log)
 
       # TODO: Option to get only nonwilds
 
       url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
 
+      debug = True
+      if debug:
+        if page > 0:
+          # User broken URI
+          url = "https://apiX.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
+
       # TODO: If fails, return latest successful id. Then push this to variables.
-      # Yield exception with value, then use isinstance to check if it's exception or not. If exception, push t variables and stop.
+      # Yield exception with value, then use isinstance to check if it's exception or not. If exception, push to variables and stop.
       # Check: throwing vs. raising errors
-      inatResponseDict = self.getPageFromAPI(url)
+      try:
+        inatResponseDict = self.getPageFromAPI(url)
+      except Exception as e:
+        return e
+      else:
+        yield inatResponseDict["results"]
+      finally:
+        print("Got: " + log)
+        page = page + 1
 
       # TODO: update lastUpdateKey as the last get in the response
 
-      yield inatResponseDict["results"]
 
 
 
