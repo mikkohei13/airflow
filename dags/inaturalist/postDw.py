@@ -9,7 +9,8 @@ class postDw():
     self._sharedVar = 1
 
 
-  def postSingleMock(self, dwObservationJson):
+  def postSingleMock(self, dwObs):
+    dwObservationJson = json.dumps(dwObs)
     targetUrl = "https://14935.mocklab.io/inat"
 
     # sending post request and saving the response as response object 

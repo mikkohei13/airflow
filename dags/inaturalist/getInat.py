@@ -54,6 +54,7 @@ class getInat():
 
     Returns:
       orderedDictionary: Yields observations and associated API metadata (paging etc.)
+      boolean: Returns False when no more results.
     """
 
     # TODO: Check if time(zone) is correct in Docker.
@@ -66,8 +67,7 @@ class getInat():
     # TODO: stop after all is fecthed
 
     while page < maxPages:
-      log = "Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime
-      print(log)
+      print("Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime)
 
       # TODO: Option to get only nonwilds
 
@@ -79,9 +79,18 @@ class getInat():
         if page > 0:
           # User broken URI
           url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "00&include_new_projects=true"
+      # Debug end
 
+      print("Getting URL " + url)
       inatResponseDict = self.getPageFromAPI(url)
-      print("Got: " + log + "\n")
+
+      print("Got " + str(inatResponseDict["total_results"]) + " observations.")
+
+      # If no observations on page, just return False
+      if 0 == inatResponseDict["total_results"]:
+        print("No more observations.")
+        return False
+
       page = page + 1
 
       # return whole dict

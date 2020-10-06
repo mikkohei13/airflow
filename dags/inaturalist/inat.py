@@ -27,44 +27,48 @@ thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 airflowVariable_inat_latest_obs_id = Variable.get("inat_latest_obs_id")
 airflowVariable_inat_latest_update = Variable.get("inat_latest_update")
 
+airflowVariable_inat_latest_obs_id = 60063865 # debug
 
 # GET
 
 inat = getInat.getInat()
+postDw = postDw.postDw()
 
 i = 0 # debug
 
+lastUpdateKey = 0 # Just in case, should be returned with conversion function
+
+# For each pageful of data
 for multiObservationDict in inat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
   print("")
   print("i: " + str(i)) # debug
 #  print(multiObservationDict)
 
-  # CONVERT
-  for nro, inatObs in enumerate(multiObservationDict['results']): 
-    dwObs = inatToDw.convertObservation(inatObs)
-    print("---" + str(nro) + "--------------------------------------------------")
-    print(dwObs)
+  # If no observations on page, don't convert & post
+  if False == multiObservationDict:
+    break;
 
-  
+  # CONVERT
+  dwObservations = inatToDw.convertObservations(multiObservationDict['results'])
+
+  print(dwObservations)
 
   # POST
+  # ABBA: single obs -> multi obs
+#  postDw.postSingleMock(dwObs)
 
-  # If all successful:
-  # lastUpdateKey = # get from result
-  lastObservationDict = multiObservationDict['results'][-1]
-  lastUpdateKey = lastObservationDict["id"]
-  print("lastUpdateKey: " + str(lastUpdateKey))
-
-  # set lastUpdateKey as variable
-# UNCOMMENT THIS TO USE VARS
-#  Variable.set("inat_latest_obs_id", lastUpdateKey)
-
-#  print(multiObservationDict)
+  # TODO: return last successfully posted id, when dw api returns 200
 
 
-# If whole for was successful
-# UNCOMMENT THIS TO USE VARS
-Variable.set("inat_latest_update", thisUpdateTime)
+  # If this pageful contained data, and was saved successfully to DW, set lastUpdateKey as variable
+  if lastUpdateKey > 0:
+    print("lastUpdateKey: " + str(lastUpdateKey))
+#   Variable.set("inat_latest_obs_id", lastUpdateKey) # UNCOMMENT THIS TO USE VARS
+
+
+
+# If whole process was successful
+#Variable.set("inat_latest_update", thisUpdateTime) # UNCOMMENT THIS TO USE VARS
 
 
 # TODO: This will be used for debugging -> not needed in DAG, only on CLI
@@ -89,7 +93,7 @@ Variable.set("inat_latest_update", thisUpdateTime)
 
 ### POST
 
-#dw = postDw.postDw()
+
 
 #dataJson = json.dumps(data)
 #print(dataJson)
