@@ -23,6 +23,7 @@ def convertObservations(inatObservations):
 
     documentId = dw["collectionId"] + "/" + str(inat["id"])
     dw["documentId"] = documentId
+    dw["id"] = inat["id"] # The original id is needed for returning lastUpdateKey, so do not remove it here! TODO maybe: this function returns the id, then inat.py uses it only if posting was successful
 
     dwObservations.append(dw)
     print("Converted obs " + str(inat["id"]))

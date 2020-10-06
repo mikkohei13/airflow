@@ -54,11 +54,7 @@ for multiObservationDict in inat.getUpdatedGenerator(airflowVariable_inat_latest
   print(dwObservations)
 
   # POST
-  # ABBA: single obs -> multi obs
-#  postDw.postSingleMock(dwObs)
-
-  # TODO: return last successfully posted id, when dw api returns 200
-
+  lastUpdateKey = postDw.postMultiMock(dwObservations)
 
   # If this pageful contained data, and was saved successfully to DW, set lastUpdateKey as variable
   if lastUpdateKey > 0:
