@@ -19,14 +19,13 @@ Note that AIRFLOW__CORE__FERNET_KEY and FERNET_KEY have to be must be 32 url-saf
 
 # Todo
 
-- Do conversion for multiple observations: iterate inatDict, create dwDict
-- If no errors, push dwDict to mock-api. If errors, raise exception
+- Rewrite minimal conversion with python
+- Push to staging dw, with token hidden from Git
 - Setup Python IDE
 - Setup (unit) testing
 - Setup email notifications
-- Rewrite conversion with python
-- Push to staging dw
-- Setup proper env values, password-protect webserver ui, 
+- Rewrite all conversions with python (add: no accuracy when coarse location)
+- Setup proper env values, password-protect webserver ui
 - Show to colleagues, get feedback
 
 
