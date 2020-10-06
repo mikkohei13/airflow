@@ -19,11 +19,11 @@ Note that AIRFLOW__CORE__FERNET_KEY and FERNET_KEY have to be must be 32 url-saf
 
 # Todo
 
-- Handle multiple files with pagination
+- Do conversion for multiple observations: iterate inatDict, create dwDict
+- If no errors, push dwDict to mock-api. If errors, raise exception
 - Setup Python IDE
 - Setup (unit) testing
 - Setup email notifications
-- Handle iNat api timeout & retries
 - Rewrite conversion with python
 - Push to staging dw
 - Setup proper env values, password-protect webserver ui, 

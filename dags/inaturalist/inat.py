@@ -36,10 +36,15 @@ i = 0 # debug
 
 for multiObservationDict in inat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
   print("")
-  print(str(i)) # debug
-  print(multiObservationDict)
+  print("i: " + str(i)) # debug
+#  print(multiObservationDict)
 
   # CONVERT
+  for nro, inatObs in enumerate(multiObservationDict['results']): 
+    dwObs = inatToDw.convertObservation(inatObs)
+    print("---" + str(nro) + "--------------------------------------------------")
+    print(dwObs)
+
   
 
   # POST
@@ -52,7 +57,7 @@ for multiObservationDict in inat.getUpdatedGenerator(airflowVariable_inat_latest
 
   # set lastUpdateKey as variable
 # UNCOMMENT THIS TO USE VARS
-  Variable.set("inat_latest_obs_id", lastUpdateKey)
+#  Variable.set("inat_latest_obs_id", lastUpdateKey)
 
 #  print(multiObservationDict)
 
