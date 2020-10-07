@@ -6,6 +6,8 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
 
 # Setup
 
+To set up:
+
   git clone https://github.com/mikkohei13/airflow.git
   chmod -R 777 logs/
   chmod -R 777 dags/
@@ -14,7 +16,26 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
 Set environment variables to .env.
 Note that AIRFLOW__CORE__FERNET_KEY and FERNET_KEY have to be must be 32 url-safe base64-encoded bytes. These can be generated with ´openssl rand -base64 32´ 
 
+Then:
+
   docker-compose up; docker-compose down;
+
+Set up latest observation id and update time to Varibales. TODO: instructions.
+
+To test the DAG in Airflow, enable and trigger it manually. 
+
+To run scripts manually, start with:
+
+  docker exec -ti airflow_webserver bash
+  cd dags/inaturalist/
+
+Debug single observations:
+
+  python3 single.py 60063865 dry 
+
+Get updated observations and post to DW:
+
+  python3 inat.py
 
 
 # Todo
