@@ -13,6 +13,7 @@ def postSingleMock(dwObs):
 
 
 def postMultiMock(dwObservations):
+  # TODO: Decide whther to do this here, or just return true and pick the last successful id in main 
   lastUpdateKey = dwObservations[-1]["id"]
 
   dwObservationsJson = json.dumps(dwObservations)

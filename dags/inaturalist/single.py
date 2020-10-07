@@ -6,6 +6,8 @@ import getInat
 import inatToDw
 import postDw
 
+import json # for debug
+
 ### SETUP
 
 print("Start") 
@@ -26,3 +28,5 @@ dwObservation = inatToDw.convertObservations(singleObservationDict['results'])
 print("--------------------------------------------------------------")
 print("DW:")
 pp.pprint(dwObservation)
+json = json.dumps(dwObservation)
+print(json)
