@@ -1,6 +1,7 @@
 import json
 import requests
 import datetime
+import sys
 
 from airflow.models import Variable
 
@@ -12,6 +13,7 @@ import postDw
 # Temp helper
 def printObject(object):
   print(object.__dict__)
+
 
 
 
@@ -31,15 +33,12 @@ airflowVariable_inat_latest_obs_id = 60063865 # debug
 
 # GET
 
-inat = getInat.getInat()
-postDw = postDw.postDw()
-
 i = 0 # debug
 
 lastUpdateKey = 0 # Just in case, should be returned with conversion function
 
 # For each pageful of data
-for multiObservationDict in inat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
+for multiObservationDict in getInat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
   print("")
   print("i: " + str(i)) # debug
 #  print(multiObservationDict)

@@ -4,110 +4,116 @@ import requests
 import json
 from collections import OrderedDict
 
+def getPageFromAPI(url):
+  """Get a single pageful of observations from iNat.
 
-class getInat():
-  # TODO: if shared state is not needed, refactor into pure functions, without a class
+  Args:
+    url (string): API URL to get data from.
 
-  def __init__(self):
-    self.x = 1
+  Raises:
+    Exception: API responds with code other than 200, or does not repond at all.
 
+  Returns:
+    orderedDictionary: Observatons and associated API metadata (paging etc.)
+  """
+  print("Getting " + url)
+  
+  try:
+    inatResponse = requests.get(url)
+  #printObject(inatResponse)
+  except:
+    raise Exception("Error getting data from iNaturalist API")
 
-  def getPageFromAPI(self, url):
-    """Get a single pageful of observations from iNat.
+  # TODO: Find out why slightly too large idAbove returns 200 with zero results, but with much too large returns 400 
+  if 200 == inatResponse.status_code:
+    print("iNaturalist API responded " + str(inatResponse.status_code))
+  else:
+    errorCode = str(inatResponse.status_code)
+    raise Exception(f"iNaturalist API responded with error {errorCode}")
 
-    Args:
-      url (string): API URL to get data from.
+  # TODO: create ordered dict
+  inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
 
-    Raises:
-      Exception: API responds with code other than 200, or does not repond at all.
-
-    Returns:
-      orderedDictionary: Observatons and associated API metadata (paging etc.)
-    """
-    print("Getting " + url)
-    
-    try:
-      inatResponse = requests.get(url)
-    #printObject(inatResponse)
-    except:
-      raise Exception("Error getting data from iNaturalist API")
-
-    # TODO: Find out why slightly too large idAbove returns 200 with zero results, but with much too large returns 400 
-    if 200 == inatResponse.status_code:
-      print("iNaturalist API responded " + str(inatResponse.status_code))
-    else:
-      errorCode = str(inatResponse.status_code)
-      raise Exception(f"iNaturalist API responded with error {errorCode}")
-
-    # TODO: create ordered dict
-    inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
-
-    return inatResponseDict
+  return inatResponseDict
 
 
-  def getUpdatedGenerator(self, lastUpdateKey, lastUpdateTime):
-    """Generator that gets and yields new and updated iNat observations, by handling pagination and calling self.getPageFromAPI().
+def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
+  """Generator that gets and yields new and updated iNat observations, by handling pagination and calling getPageFromAPI().
 
-    Args:
-      lastUpdateKey (int): Highest observation id that should not be fetched.
-      lastUpdateTime (string): Time after which updated observations should be fecthed.
+  Args:
+    lastUpdateKey (int): Highest observation id that should not be fetched.
+    lastUpdateTime (string): Time after which updated observations should be fecthed.
 
-    Returns:
-      orderedDictionary: Yields observations and associated API metadata (paging etc.)
-      boolean: Returns False when no more results.
-    """
+  Raises:
+    Exception: If getPageFromAPI() fails to fetch data.
 
-    # TODO: Check if time(zone) is correct in Docker.
+  Returns:
+    orderedDictionary: Yields observations and associated API metadata (paging etc.)
+    boolean: Returns False when no more results.
+  """
 
-    # TODO: move as args
-    perPage = 3 # Production value: 100
-    maxPages = 3 # Production value: 1000
-    page = 0
+  # TODO: Check if time(zone) is correct in Docker.
 
-    # TODO: stop after all is fecthed
+  # TODO: move as args
+  perPage = 3 # Production value: 100
+  maxPages = 3 # Production value: 1000
+  page = 0
 
-    while page < maxPages:
-      print("Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime)
+  # TODO: stop after all is fecthed
 
-      # TODO: Option to get only nonwilds
+  while page < maxPages:
+    print("Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime)
 
-      url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
+    # TODO: Option to get only nonwilds
 
-      # Debugging case where API does not respond correctly after n:th page
-      debug = True
-      if debug:
-        if page > 0:
-          # User broken URI
-          url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "00&include_new_projects=true"
-      # Debug end
+    url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
 
-      print("Getting URL " + url)
-      inatResponseDict = self.getPageFromAPI(url)
+    # Debugging case where API does not respond correctly after n:th page
+    debug = True
+    if debug:
+      if page > 0:
+        # User broken URI
+        url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "00&include_new_projects=true"
+    # Debug end
 
-      print("Got " + str(inatResponseDict["total_results"]) + " observations.")
+    print("Getting URL " + url)
+    inatResponseDict = getPageFromAPI(url)
 
-      # If no observations on page, just return False
-      if 0 == inatResponseDict["total_results"]:
-        print("No more observations.")
-        return False
+    print("Got " + str(inatResponseDict["total_results"]) + " observations.")
 
-      page = page + 1
-
-      # return whole dict
-      yield inatResponseDict
-
-
-
-  def getSingle(self, observationId):
-    url = "https://api.inaturalist.org/v1/observations?id=" + str(observationId) + "&order=desc&order_by=created_at&include_new_projects=true";
-
-    inatResponseDict = self.getPageFromAPI(url)
-
-    # When getting a single observation, zero results is an error
+    # If no observations on page, just return False
     if 0 == inatResponseDict["total_results"]:
-      raise Exception(f"Zero results from iNaturalist API")
+      print("No more observations.")
+      return False
 
-    # TODO: Check should this return the whole dict?
-    return inatResponseDict["results"][0]
-    
+    page = page + 1
+
+    # return whole dict
+    yield inatResponseDict
+
+
+
+def getSingle(observationId):
+  """Gets and returns a single iNat observation, by calling getPageFromAPI().
+
+  Args:
+    observationId (int): iNat observation id.
+
+  Raises:
+    Exception: If getPageFromAPI() fails to fetch data, or if zero result is found.
+
+  Returns:
+    orderedDictionary: Single observation and associated API metadata (paging etc.)
+  """
+
+  url = "https://api.inaturalist.org/v1/observations?id=" + str(observationId) + "&order=desc&order_by=created_at&include_new_projects=true";
+
+  inatResponseDict = getPageFromAPI(url)
+
+  # When getting a single observation, zero results is an error
+  if 0 == inatResponseDict["total_results"]:
+    raise Exception(f"Zero results from iNaturalist API")
+
+  return inatResponseDict
+  
 
