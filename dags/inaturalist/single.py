@@ -9,6 +9,7 @@ import postDw
 ### SETUP
 
 print("Start") 
+pp = pprint.PrettyPrinter(indent=2)
 
 # Get arguments
 id = sys.argv[1] # id of the iNat observation, puolukkapiiloyökkönen 60063865
@@ -16,7 +17,12 @@ mode = sys.argv[2] # dry | prod
 
 singleObservationDict = getInat.getSingle(id)
 
+if "dry" == mode:
+  print("INAT:")
+  pp.pprint(singleObservationDict['results'])
+
 dwObservation = inatToDw.convertObservations(singleObservationDict['results'])
 
-pp = pprint.PrettyPrinter(indent=2)
+print("--------------------------------------------------------------")
+print("DW:")
 pp.pprint(dwObservation)

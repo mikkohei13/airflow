@@ -3,6 +3,7 @@
 import requests
 import json
 from collections import OrderedDict
+import time
 
 def getPageFromAPI(url):
   """Get a single pageful of observations from iNat.
@@ -57,6 +58,8 @@ def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
   # TODO: move as args
   perPage = 3 # Production value: 100
   maxPages = 3 # Production value: 1000
+  sleepSeconds = 3
+
   page = 0
 
   # TODO: stop after all is fecthed
@@ -87,6 +90,7 @@ def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
       return False
 
     page = page + 1
+    time.sleep(sleepSeconds) # TODO: Can this be after yield?
 
     # return whole dict
     yield inatResponseDict
