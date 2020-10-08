@@ -9,13 +9,23 @@ NOTES/POSSIBLY TODO:
 - DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flaged media files, e.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
-- Flter out unwanter users (e.g. test users: testaaja, outo)
+- Filter out unwanter users (e.g. test users: testaaja, outo)
 
 Misc facts left out:
 "identifications_most_agree"
 "identifications_most_disagree"
 "observerActivityCount" // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
 
+iNat API features:
+- This conversion expects that all observations are from Finland, and are filtered by the API call. If changed, need to remove hard-coded country name here.
+- Quality metrics appear on the api after a delay (15 mins?)
+- 
+
+DW data features:
+- There can be multiple facts with the same name
+- Facts are strings
+- Fields can be left blank
+- Enum values are ALL-CAPS
 
 """
 
