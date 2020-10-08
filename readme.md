@@ -41,11 +41,12 @@ Get updated observations and post to DW:
 # Todo
 
 - Rewrite minimal conversion with python
+- Rewrite all conversions with python (add: no accuracy when coarse location)
+- Create airflow image with version number, and pip requirements incl. bs4
 - Push to staging dw, with token hidden from Git
 - Setup Python IDE
 - Setup (unit) testing
 - Setup email notifications
-- Rewrite all conversions with python (add: no accuracy when coarse location)
 - Setup proper env values, password-protect webserver ui
 - Show to colleagues, get feedback
 

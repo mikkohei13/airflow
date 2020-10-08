@@ -10,11 +10,17 @@ import json # for debug
 
 ### SETUP
 
+"""
+Test observations
+puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html
+53608382 - coll and trad projects, obs fields (also negative)
+"""
+
 print("Start") 
 pp = pprint.PrettyPrinter(indent=2)
 
 # Get arguments
-id = sys.argv[1] # id of the iNat observation, puolukkapiiloyökkönen 60063865
+id = sys.argv[1] # id of the iNat observation
 mode = sys.argv[2] # dry | prod
 
 singleObservationDict = getInat.getSingle(id)
