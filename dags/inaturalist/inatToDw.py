@@ -84,6 +84,26 @@ def summarizeQualityMetrics(quality_metrics):
   return summary
 
 
+def getLicenseUrl(licenseCode):
+  licenses = {}
+  licenses["cc0"] = "http://tun.fi/MZ.intellectualRightsCC0-4.0"
+  licenses["cc-by"] = "http://tun.fi/MZ.intellectualRightsCC-BY-4.0"
+  licenses["cc-by-nc"] = "http://tun.fi/MZ.intellectualRightsCC-BY-NC-4.0"
+  licenses["cc-by-nd"] = "http://tun.fi/MZ.intellectualRightsCC-BY-ND-4.0"
+  licenses["cc-by-sa"] = "http://tun.fi/MZ.intellectualRightsCC-BY-SA-4.0"
+  licenses["cc-by-nc-nd"] = "http://tun.fi/MZ.intellectualRightsCC-BY-NC-ND-4.0"
+  licenses["cc-by-nc-sa"] = "http://tun.fi/MZ.intellectualRightsCC-BY-NC-SA-4.0"
+
+  if False == licenseCode:
+    return "http://tun.fi/MZ.intellectualRightsARR"
+  else:
+    if licenseCode in licenses:
+      return licenses[licenseCode]
+    else:
+      print("Unknown license code " + licenseCode)
+      return "http://tun.fi/MZ.intellectualRightsARR"
+
+
 def convertObservations(inatObservations):
   """Convert a single observation from iNat to FinBIF DW format.
 
@@ -204,6 +224,15 @@ def convertObservations(inatObservations):
       keywords = appendTags(keywords, inat["tags"])
 
 
+    # Observation fields
+    for nro, val in enumerate(inat['ofvs']):
+      unitFacts.append({val['name_ci']: val['value_ci']}) # This preserves zero values, which can be important in observation fields
+
+
+    # License URL's/URI's
+    publicDocument['licenseId'] = getLicenseUrl(inat['license_code'])
+
+
     # Quality metrics
     qualityMetricUnreliable = False
     if "quality_metrics" in inat:
@@ -241,6 +270,7 @@ def convertObservations(inatObservations):
       unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
       keywords.append("flagged")
 
+
     # Quality grade
     unitFacts.append({"quality_grade": inat['quality_grade'] + "_grade"})
     keywords.append(inat['quality_grade'] + "_grade")
@@ -249,11 +279,6 @@ def convertObservations(inatObservations):
     if "research" == inat['quality_grade']:
       unit['sourceTags'] = []
       unit['sourceTags'].append("COMMUNITY_TAG_VERIFIED")
-
-
-    # Observation fields
-    for nro, val in enumerate(inat['ofvs']):
-      unitFacts.append({val['name_ci']: val['value_ci']}) # This preserves zero values, which can be important in observation fields
 
 
     # Misc facts
