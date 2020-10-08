@@ -47,6 +47,7 @@ Get updated observations and post to DW:
 - Setup Python IDE
 - Setup (unit) testing
 - Setup email notifications
+- Store original observations from inat, where?
 - Setup proper env values, password-protect webserver ui
 - Show to colleagues, get feedback
 

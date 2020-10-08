@@ -43,6 +43,33 @@ def appendTags(keywordsList, tags):
   return keywordsList
 
 
+def summarizeQualityMetrics(quality_metrics):
+  summary = {}
+
+  for nro, vote in enumerate(quality_metrics):
+    # Skip vote if spam or suspended user
+    if vote["user"]["spam"]:
+      continue
+    if vote["user"]["suspended"]:
+      continue 
+
+    # Calculate vote
+    if True == vote["agree"]:
+      value = 1
+    elif False == vote["agree"]:
+      value = -1
+    else:
+      value = 0 
+
+    # Init if not set
+    if vote["metric"] not in summary:
+      summary[vote["metric"]] = 0 
+
+    summary[vote["metric"]] = summary[vote["metric"]] + value
+
+  return summary
+
+
 def convertObservations(inatObservations):
   """Convert a single observation from iNat to FinBIF DW format.
 
@@ -167,6 +194,26 @@ def convertObservations(inatObservations):
     if inat['flags']:
       x=1
       # TODO: quality 
+
+
+    # Quality metrics
+    # TODO: There was byg in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
+    qualityMetricUnreliable = False
+    if "quality_metrics" in inat:
+      qualityMetricsSummary = summarizeQualityMetrics(inat["quality_metrics"])
+      print(qualityMetricsSummary)
+
+      for metric, value in qualityMetricsSummary.items():
+        # Add to facts
+        metricName = "quality_metrics_" + metric
+        unitFacts.append({metricName: str(value)})
+
+        # If at least one negative quality metric, mark as unreliable. Exception: non-wilds are handled elsewhere.
+        if "wild" != metric:
+          if value < 0:
+            qualityMetricUnreliable = True
+
+    
 
 
     # Observation fields
