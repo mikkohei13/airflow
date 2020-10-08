@@ -241,7 +241,11 @@ def convertObservations(inatObservations):
       unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
       keywords.append("flagged")
 
-    # Verification
+    # Quality grade
+    unitFacts.append({"quality_grade": inat['quality_grade'] + "_grade"})
+    keywords.append(inat['quality_grade'] + "_grade")
+
+    # Quality tags
     if "research" == inat['quality_grade']:
       unit['sourceTags'] = []
       unit['sourceTags'].append("COMMUNITY_TAG_VERIFIED")
