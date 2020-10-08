@@ -37,6 +37,12 @@ def appendTraditionalProjects(factsList, projects):
   return factsList
 
 
+def appendTags(keywordsList, tags):
+  for nro, tag in enumerate(tags):
+    keywordsList.append(tag)
+  return keywordsList
+
+
 def convertObservations(inatObservations):
   """Convert a single observation from iNat to FinBIF DW format.
 
@@ -114,7 +120,7 @@ def convertObservations(inatObservations):
 
 
     # Description
-    if "description" in inat:
+    if "description" in inat: # TODO: This line not needed, even if desc would be missing??
       gathering['notes'] = inat["description"]
 
 
@@ -131,6 +137,30 @@ def convertObservations(inatObservations):
     # Traditional (manual)
     if "project_observations" in inat:
       documentFacts = appendTraditionalProjects(documentFacts, inat['project_observations'])
+
+
+    # Dates
+    publicDocument['createdDate'] = inat['created_at_details']['date']
+
+    updatedDatePieces = inat['updated_at'].split("T")
+    publicDocument['modifiedDate'] = updatedDatePieces[0]
+
+    gathering['eventDate'] = {}
+    gathering['eventDate']['begin'] = inat['observed_on_details']['date'] # TODO: test if date is missing
+    gathering['eventDate']['end'] = gathering['eventDate']['begin'] # End alsways same as beginning
+
+    documentFacts.append({"observedOrCreatedAt": inat['time_observed_at']}) # This is the exact datetime when observation was saved
+
+
+    # Locality
+    # Locality name used to be reversed, but not needed really?
+    gathering['locality'] = inat['place_guess']
+    gathering['country'] = "Finland"; # NOTE: This expects that only Finnish observations are fecthed
+
+
+    # Tags
+    if "tags" in inat:
+      keywords = appendTags(keywords, inat["tags"])
 
 
     # Quality
@@ -163,6 +193,7 @@ def convertObservations(inatObservations):
     publicDocument['facts'] = documentFacts
     gathering['facts'] = gatheringFacts
     unit['facts'] = unitFacts
+    publicDocument['keywords'] = keywords
 
 
     gathering["units"] = []

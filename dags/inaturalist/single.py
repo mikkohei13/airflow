@@ -13,7 +13,8 @@ import json # for debug
 """
 Test observations
 puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html
-53608382 - coll and trad projects, obs fields (also negative)
+(joku)hopeatäplä 53608382 - coll and trad projects, obs fields (also negative)
+ohdakeperhonen 39330050 - locality names
 """
 
 print("Start") 

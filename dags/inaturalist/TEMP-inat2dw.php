@@ -59,19 +59,8 @@ function observationInat2Dw($inat) {
 
 
 
-  // Dates
-  $dw['publicDocument']['createdDate'] = $inat['created_at_details']['date'];
-  $updatedDatePieces = explode("T", $inat['updated_at']);
-  $dw['publicDocument']['modifiedDate'] = $updatedDatePieces[0];
-
-  $dw['publicDocument']['gatherings'][0]['eventDate']['begin'] = removeNullFalse($inat['observed_on_details']['date']);
-  $dw['publicDocument']['gatherings'][0]['eventDate']['end'] = $dw['publicDocument']['gatherings'][0]['eventDate']['begin']; // End is same as beginning
-
-  $factsArr = factsArrayPush($factsArr, "D", "observedOrCreatedAt", $inat['time_observed_at']); // This is usually datetime observed (taken from image or app), but sometimes datetime created
-
-
   // Coordinates
-  if ($inat['mappable']) { // ABBA
+  if ($inat['mappable']) {
     $dw['publicDocument']['gatherings'][0]['coordinates']['type'] = "WGS84";
 
 
@@ -121,9 +110,6 @@ function observationInat2Dw($inat) {
   }
 
 
-  // Locality
-  $locality = stringReverse($inat['place_guess']);
-
   // Remove FI, Finland & Suomi from the beginning
   if (0 === strpos($locality, "FI,")) {
     $locality = substr($locality, 3);
@@ -136,8 +122,6 @@ function observationInat2Dw($inat) {
   }
   $locality = trim($locality, ", ");
  
-  $dw['publicDocument']['gatherings'][0]['locality'] = $locality;
-  $dw['publicDocument']['gatherings'][0]['country'] = "Finland"; // NOTE: This expects that only Finnish observations are fecthed
 
 
   // Photos
@@ -210,13 +194,6 @@ function observationInat2Dw($inat) {
     $dw['publicDocument']['gatherings'][0]['units'][0]['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED";
   }
 
-
-  // Tags
-  if (!empty($inat['tags'])) {
-    foreach ($inat['tags'] as $tagNro => $tag) {
-      array_push($keywordsArr, $tag);
-    }
-  }
 
 
   // Annotations
@@ -333,19 +310,6 @@ function observationInat2Dw($inat) {
 
   // ----------------------------------------------------------------------------------------
 
-  // Handle temporary arrays
-  $dw['publicDocument']['keywords'] = $keywordsArr;
-  $dw['publicDocument']['gatherings'][0]['notes'] = implode(" / ", $descArr);
-
-  if (!empty($factsArr['D'])) {
-    $dw['publicDocument']['facts'] = $factsArr['D'];
-  }
-  if (!empty($factsArr['G'])) {
-    $dw['publicDocument']['gatherings'][0]['facts'] = $factsArr['G'];
-  }
-  if (!empty($factsArr['U'])) {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['facts'] = $factsArr['U'];
-  }
 
 
   log2("NOTICE", "Converted obs\t" . $inat['id'] . " of " . $inat['taxon']['name'] . " observed " . $inat['observed_on_details']['date'] . " updated " . $inat['updated_at'], "log/inat-obs-log.log");
