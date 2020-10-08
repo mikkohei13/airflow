@@ -3,6 +3,20 @@
 import pprint
 import json # for debug
 
+"""
+NOTES/TODO:
+- There was bug in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
+- DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
+- What to do if observation contains 1...n copyright infringement flaged media files, e.g. https://www.inaturalist.org/observations/46356508
+
+Misc facts left out:
+"identifications_most_agree"
+"identifications_most_disagree"
+"observerActivityCount" // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
+
+
+"""
+
 
 def skipObservation(inat):
   if not inat["taxon"]:
@@ -190,14 +204,7 @@ def convertObservations(inatObservations):
       keywords = appendTags(keywords, inat["tags"])
 
 
-    # Quality
-    if inat['flags']:
-      x=1
-      # TODO: quality 
-
-
     # Quality metrics
-    # TODO: There was byg in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
     qualityMetricUnreliable = False
     if "quality_metrics" in inat:
       qualityMetricsSummary = summarizeQualityMetrics(inat["quality_metrics"])
@@ -213,13 +220,38 @@ def convertObservations(inatObservations):
           if value < 0:
             qualityMetricUnreliable = True
 
-    
+
+    # Quality on DW
+    # Init
+    unit["quality"] = {}
+    unit["quality"]["issue"] = {}
+
+    # Negative quality metrics (thumbs down) 
+    # TODO: Check: does this make issue, or mark as unreliable, or both on Laji.fi?
+    if qualityMetricUnreliable:
+      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
+      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      keywords.append("quality-metric-unreliable")
+
+    # Flags
+    # TODO: Has not been tested!
+    if inat["flags"]:
+      publicDocument['concealment'] = "PRIVATE" # Mark private, because might be flagged due to copyright or privacy reasons.
+      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
+      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      keywords.append("flagged")
+
+    # Verification
+    if "research" == inat['quality_grade']:
+      unit['sourceTags'] = []
+      unit['sourceTags'].append("COMMUNITY_TAG_VERIFIED")
 
 
     # Observation fields
     for nro, val in enumerate(inat['ofvs']):
       unitFacts.append({val['name_ci']: val['value_ci']}) # This preserves zero values, which can be important in observation fields
-    
+
+
     # Misc facts
     unitFacts = appendFact(unitFacts, inat, "out_of_range")
     unitFacts = appendFact(unitFacts, inat, "taxon_geoprivacy")

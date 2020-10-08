@@ -36,28 +36,6 @@ function observationInat2Dw($inat) {
 
 
 
-  // Quality metrics
-  // Not that the iNat API displays quality metric changes with a delay (maybe 15 mins??)
-  $qualityMetricUnreliable = FALSE;
-  if ($inat['quality_metrics']) {
-    $qualityMetrics = summarizeQualityMetrics($inat['quality_metrics']);
-
-    print_r ($qualityMetrics);
-    foreach ($qualityMetrics as $key => $value) {
-      $factsArr = factsArrayPush($factsArr, "U", "quality_metrics_" . $key, $value, TRUE);
-
-      // If at least one negative quality metric -> unreliable
-      // Exception: non-wild -> not unreliable
-      if ("wild" != $key) {
-        if (-1 == $value) {
-          $qualityMetricUnreliable = TRUE;
-        }
-      }
-
-    }
-  }
-
-
 
   // Coordinates
   if ($inat['mappable']) {
@@ -266,47 +244,6 @@ function observationInat2Dw($inat) {
 // OAuth_application_id: blank = website, 2 = android, 3 = iOS, other = third-party apps
   $factsArr = factsArrayPush($factsArr, "U", "oauth_application_id", $inat['oauth_application_id'], FALSE);
 
-
-  // DW quality issues & tags
-
-  // TODO:
-  // What to do if observation contains 1...n copyright infringement flaged media files, e.g. https://www.inaturalist.org/observations/46356508
-
-  // Handling flagged obs has not been tested!
-  if (!empty($inat['flags'])) {
-    $dw['publicDocument']['concealment'] = "PRIVATE";
-
-    $dw['publicDocument']['gatherings'][0]['units'][0]['quality']['issue']['issue'] = "REPORTED_UNRELIABLE";
-    $dw['publicDocument']['gatherings'][0]['units'][0]['quality']['issue']['source'] = "ORIGINAL_DOCUMENT";
-
-    array_push($keywordsArr, "flagged");
-  }
-
-  // Negative quality metrics (thumbs down) 
-  if ($qualityMetricUnreliable) {
-    // ABBA if only wildness, no issues
-    $dw['publicDocument']['gatherings'][0]['units'][0]['quality']['issue']['issue'] = "REPORTED_UNRELIABLE";
-    $dw['publicDocument']['gatherings'][0]['units'][0]['quality']['issue']['source'] = "ORIGINAL_DOCUMENT";
-
-    array_push($keywordsArr, "quality-metric-unreliable");
-  }
-
-  // Humans
-  // DW removed/hides humans, so this is not really needed. Saved for possible future use. 
-  if ("Homo sapiens" == $inat['taxon']['name']) {
-//    $dw['publicDocument']['concealment'] = "PRIVATE";
-
-    // Remove images
-    unset($dw['publicDocument']['gatherings'][0]['units'][0]['media']);
-
-    // Clear description
-    $descArr = Array();
-  }
-
-  // Community verified observations
-  if ("research" == $inat['quality_grade']) {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['sourceTags'][] = "COMMUNITY_TAG_VERIFIED";
-  }
 
   // ----------------------------------------------------------------------------------------
 
