@@ -7,34 +7,11 @@ function observationInat2Dw($inat) {
 
 
   /*
-  This expects that certain observations are filtered out in the API call:
-  - Non-Finnish. If this is exapanded to other countries, remove hard-coded country name. Also note that country name may be in any language or abbreviation (Finland, FI, Suomi...).
-  - Observations without license
-  - Captive/cultivated 
-
-  Notes:
-  - Samalla nimellä voi olla monta faktaa
-  - Faktat ovat stringejä
-  - Kenttiä voi jättää tyhjiksi, se vain kasattaa json:in kokoa.
-  - Enum-arvot ovat all-caps
-  - Ei käytä media-objektia, koska kuviin viittaaminen kuitenkin ylittäisi api-limiitin
 
   Ask iNat:
-  - How to have FinBIF here (not important, mostly curious...):
-  - This observation is featured on 1 site
+  - How to have FinBIF here: This observation is featured on 1 site
 
   */
-
-  // Filter testaaja's observations
-  /*
-  $vihkoUsers[] = "testaaja";
-  if (in_array($inat['user']['login'], $vihkoUsers)) {
-    log2("WARNING", "Skipped observation by Vihko user: user " . $inat['user']['login']. ", obs " . $inat['id'], "log/inat-obs-log.log");
-    return FALSE;
-  }
-  */
-
-
 
 
   // Coordinates
@@ -86,20 +63,6 @@ function observationInat2Dw($inat) {
     }
 
   }
-
-
-  // Remove FI, Finland & Suomi from the beginning
-  if (0 === strpos($locality, "FI,")) {
-    $locality = substr($locality, 3);
-  }
-  elseif (0 === strpos($locality, "Finland,")) {
-    $locality = substr($locality, 8);
-  }
-  elseif (0 === strpos($locality, "Suomi,")) {
-    $locality = substr($locality, 6);
-  }
-  $locality = trim($locality, ", ");
- 
 
 
   // Photos
@@ -201,52 +164,7 @@ function observationInat2Dw($inat) {
   $factsArr = factsArrayPush($factsArr, "U", "taxonInterpretationByiNaturalist", $inat['taxon']['name']);
 
 
-  // Observations fields
-  foreach($inat['ofvs'] as $ofvsNro => $ofvs) {
-    $factsArr = factsArrayPush($factsArr, "U", $ofvs['name_ci'], $ofvs['value_ci'], TRUE); // This must preserve zero values
-  }
-
-  // Observer name
-  // Prefer full name over loginname
-  if (!empty($inat['user']['name'])) {
-    $observer = $inat['user']['name'];
-  }
-  else {
-    $observer = $inat['user']['login'];
-  }
-  $dw['publicDocument']['gatherings'][0]['team'][0] = $observer;
-
-  // Editor & observer id
-  $userId = "inaturalist:" . $inat['user']['id'];
-  $dw['publicDocument']['editorUserIds'][0] = $userId;
-  $dw['publicDocument']['gatherings'][0]['observerUserIds'][0] = $userId;
-
-  // Orcid
-  if (!empty($inat['user']['orcid'])) {
-    $factsArr = factsArrayPush($factsArr, "D", "observerOrcid", $inat['user']['orcid'], FALSE);
-  }
-
-
-  // Quality grade
-  $factsArr = factsArrayPush($factsArr, "U", "quality_grade", $inat['quality_grade'] . "_grade");
-  array_push($keywordsArr, $inat['quality_grade'] . "_grade");
-
-  // License URL's/URI's
-  $dw['publicDocument']['licenseId'] = getLicenseUrl($inat['license_code']);
-
-  
-  // Misc facts
-//  $factsArr = factsArrayPush($factsArr, "U", "identifications_most_agree", $inat['identifications_most_agree']);
-//  $factsArr = factsArrayPush($factsArr, "U", "identifications_most_disagree", $inat['identifications_most_disagree']);
-//  $factsArr = factsArrayPush($factsArr, "U", "observerActivityCount", $inat['user']['activity_count']); // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
-//  $factsArr = factsArrayPush($factsArr, "D", "", $inat(['']);
-
-// OAuth_application_id: blank = website, 2 = android, 3 = iOS, other = third-party apps
-  $factsArr = factsArrayPush($factsArr, "U", "oauth_application_id", $inat['oauth_application_id'], FALSE);
-
-
   // ----------------------------------------------------------------------------------------
-
 
 
   log2("NOTICE", "Converted obs\t" . $inat['id'] . " of " . $inat['taxon']['name'] . " observed " . $inat['observed_on_details']['date'] . " updated " . $inat['updated_at'], "log/inat-obs-log.log");

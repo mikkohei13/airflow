@@ -4,10 +4,12 @@ import pprint
 import json # for debug
 
 """
-NOTES/TODO:
+NOTES/POSSIBLY TODO:
 - There was bug in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
 - DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flaged media files, e.g. https://www.inaturalist.org/observations/46356508
+- Earlier removed FI, Finland & Suomi from the location name, but not anymore
+- Flter out unwanter users (e.g. test users: testaaja, outo)
 
 Misc facts left out:
 "identifications_most_agree"
@@ -231,6 +233,30 @@ def convertObservations(inatObservations):
 
     # License URL's/URI's
     publicDocument['licenseId'] = getLicenseUrl(inat['license_code'])
+
+
+    # Observer
+    # Observer name, prefer full name over loginname
+    if inat['user']['name']:
+      observer = inat['user']['name']
+    else:
+      observer = inat['user']['login']
+
+    gathering['team'] = []
+    gathering['team'].append(observer)
+
+
+    # Editor & observer id
+    userId = "inaturalist:"  + str(inat['user']['id'])
+    publicDocument['editorUserIds'] = []
+    publicDocument['editorUserIds'].append(userId)
+    gathering['observerUserIds'] = []
+    gathering['observerUserIds'].append(userId)
+
+
+    # Orcid
+    if inat['user']['orcid']:
+      documentFacts.append({"observerOrcid": inat['user']['orcid']}) 
 
 
     # Quality metrics
