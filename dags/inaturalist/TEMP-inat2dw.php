@@ -121,20 +121,6 @@ function observationInat2Dw($inat) {
   }
 
 
-  // Record basis
-  if (hasSpecimen($inat['ofvs'])) {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['recordBasis'] = "PRESERVED_SPECIMEN";
-  }
-  elseif ($photoCount >= 1) {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['recordBasis'] = "HUMAN_OBSERVATION_PHOTO";
-  }
-  elseif ($soundCount >= 1) {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO";
-  }
-  else {
-    $dw['publicDocument']['gatherings'][0]['units'][0]['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED";
-  }
-
 
 
   // Annotations

@@ -7,7 +7,7 @@ import json # for debug
 NOTES/POSSIBLY TODO:
 - There was bug in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
 - DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
-- What to do if observation contains 1...n copyright infringement flaged media files, e.g. https://www.inaturalist.org/observations/46356508
+- What to do if observation contains 1...n copyright infringement flagged media files, e.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
 - Filter out unwanter users (e.g. test users: testaaja, outo)
 
@@ -178,7 +178,8 @@ def convertObservations(inatObservations):
     publicDocument['secureLevel'] = "NONE";
     publicDocument['concealment'] = "PUBLIC";
 
-    # identifiers
+
+    # Identifiers
     documentId = dw["collectionId"] + "/" + str(inat["id"])
     dw["documentId"] = documentId
     publicDocument['documentId'] = documentId
@@ -235,10 +236,32 @@ def convertObservations(inatObservations):
     if "tags" in inat:
       keywords = appendTags(keywords, inat["tags"])
 
+    
+    # Photos
+    photoCount = len(inat['observation_photos'])
+
+
+    # Sounds
+    soundCount = len(inat['sounds'])
+
 
     # Observation fields
+    hasSpecimen = False
     for nro, val in enumerate(inat['ofvs']):
       unitFacts.append({val['name_ci']: val['value_ci']}) # This preserves zero values, which can be important in observation fields
+      if "Specimen" == val['name_ci']:
+        hasSpecimen = True
+
+
+    # Record basis
+    if hasSpecimen:
+      unit['recordBasis'] = "PRESERVED_SPECIMEN"
+    elif photoCount >= 1:
+      unit['recordBasis'] = "HUMAN_OBSERVATION_PHOTO"
+    elif soundCount >= 1:
+      unit['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO"
+    else:
+      unit['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED"
 
 
     # License URL's/URI's
