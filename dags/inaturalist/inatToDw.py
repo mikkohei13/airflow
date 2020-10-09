@@ -6,14 +6,14 @@ import json # for debug
 """
 NOTES/POSSIBLY TODO:
 - There was bug in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
+- There was bug in PHO: if obs had multiple ARR images, multiple image_arr keywords were set.
 - DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flagged media files, e.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
 - Filter out unwanter users (e.g. test users: testaaja, outo)
+- Previously used copyright string, now just user name for photo attribution, since license in separate field.
 
 Misc facts left out:
-"identifications_most_agree"
-"identifications_most_disagree"
 "observerActivityCount" // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
 
 iNat API features:
@@ -49,6 +49,16 @@ def appendFact(factsList, inat, factName):
       factsList.append({factName: inat[factName]})
 
   return factsList
+
+
+def appendKeyword(keywordList, inat, keywordName):
+  # Handles only keys directly under root of inat
+
+  if keywordName in inat: # Checks if key exists
+    if inat[keywordName]: # Checks if value is truthy
+      keywordList.append(keywordName)
+
+  return keywordList
 
 
 def appendCollectionProjects(factsList, projects):
@@ -116,6 +126,25 @@ def getLicenseUrl(licenseCode):
       return "http://tun.fi/MZ.intellectualRightsARR"
 
 
+def getImageData(photo, observer):
+  squareUrl = photo['photo']['url']
+
+  thumbnailUrl = squareUrl.replace("square", "small")
+  thumbnailUrl = thumbnailUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor into helper
+
+  fullUrl = squareUrl.replace("square", "original")
+  fullUrl = fullUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor
+
+  photoDict = {}
+  photoDict['thumbnailURL'] = thumbnailUrl
+  photoDict['fullURL'] = fullUrl
+  photoDict['copyrightOwner'] = observer
+  photoDict['author'] = observer
+  photoDict['licenseId'] = getLicenseUrl(photo['photo']['license_code'])
+  photoDict['mediaType'] = "IMAGE"
+  return photoDict
+
+
 def convertObservations(inatObservations):
   """Convert a single observation from iNat to FinBIF DW format.
 
@@ -169,14 +198,14 @@ def convertObservations(inatObservations):
 
     # Data shared by all observations
     # TODO: select prod/dev coll ... how?
-    collectionId = "http://tun.fi/HR.3211"; # Prod: HR.3211 Test: HR.11146
+    collectionId = "http://tun.fi/HR.3211" # Prod: HR.3211 Test: HR.11146
     dw["collectionId"] = collectionId
     publicDocument['collectionId'] = collectionId
 
     dw['sourceId'] = "http://tun.fi/KE.901"
-    dw['schema'] = "laji-etl";
-    publicDocument['secureLevel'] = "NONE";
-    publicDocument['concealment'] = "PUBLIC";
+    dw['schema'] = "laji-etl"
+    publicDocument['secureLevel'] = "NONE"
+    publicDocument['concealment'] = "PUBLIC"
 
 
     # Identifiers
@@ -193,6 +222,30 @@ def convertObservations(inatObservations):
     dw["id"] = inat["id"] # The original id is needed for returning lastUpdateKey, so do not remove it here! TODO maybe: this function returns the id, then inat.py uses it only if posting was successful
 
 
+    # Observer
+    # Observer name, prefer full name over loginname
+    if inat['user']['name']:
+      observer = inat['user']['name']
+    else:
+      observer = inat['user']['login']
+
+    gathering['team'] = []
+    gathering['team'].append(observer)
+
+
+    # Editor & observer id
+    userId = "inaturalist:"  + str(inat['user']['id'])
+    publicDocument['editorUserIds'] = []
+    publicDocument['editorUserIds'].append(userId)
+    gathering['observerUserIds'] = []
+    gathering['observerUserIds'].append(userId)
+
+
+    # Orcid
+    if inat['user']['orcid']:
+      documentFacts.append({"observerOrcid": inat['user']['orcid']}) 
+
+
     # Description
     if "description" in inat: # TODO: This line not needed, even if desc would be missing??
       gathering['notes'] = inat["description"]
@@ -200,7 +253,7 @@ def convertObservations(inatObservations):
 
     # Wildness
     if 1 == inat["captive"]:
-      unit['wild'] = False;
+      unit['wild'] = False
 
 
     # Projects
@@ -229,7 +282,7 @@ def convertObservations(inatObservations):
     # Locality
     # Locality name used to be reversed, but not needed really?
     gathering['locality'] = inat['place_guess']
-    gathering['country'] = "Finland"; # NOTE: This expects that only Finnish observations are fecthed
+    gathering['country'] = "Finland" # NOTE: This expects that only Finnish observations are fecthed
 
 
     # Tags
@@ -239,6 +292,26 @@ def convertObservations(inatObservations):
     
     # Photos
     photoCount = len(inat['observation_photos'])
+    if photoCount >= 1:
+      unit['media'] = []
+      unitFacts.append({"imageCount": photoCount})
+      keywords.append(str(photoCount) + "_photos")
+      arrImagesIncluded = False
+
+      for nro, photo in enumerate(inat['observation_photos']):
+        # Facts
+        photoId = str(photo['photo']['id'])
+        unitFacts.append({"imageId": photoId})
+        unitFacts.append({"imageUrl": "https://www.inaturalist.org/photos/" + photoId})
+
+        # Photo
+        if photo['photo']['license_code']:
+          unit['media'].append(getImageData(photo, observer))
+        else:
+          arrImagesIncluded = True 
+
+      if arrImagesIncluded:
+        keywords.append("image_arr") # Set if at least one photo is missing license   
 
 
     # Sounds
@@ -266,30 +339,6 @@ def convertObservations(inatObservations):
 
     # License URL's/URI's
     publicDocument['licenseId'] = getLicenseUrl(inat['license_code'])
-
-
-    # Observer
-    # Observer name, prefer full name over loginname
-    if inat['user']['name']:
-      observer = inat['user']['name']
-    else:
-      observer = inat['user']['login']
-
-    gathering['team'] = []
-    gathering['team'].append(observer)
-
-
-    # Editor & observer id
-    userId = "inaturalist:"  + str(inat['user']['id'])
-    publicDocument['editorUserIds'] = []
-    publicDocument['editorUserIds'].append(userId)
-    gathering['observerUserIds'] = []
-    gathering['observerUserIds'].append(userId)
-
-
-    # Orcid
-    if inat['user']['orcid']:
-      documentFacts.append({"observerOrcid": inat['user']['orcid']}) 
 
 
     # Quality metrics
@@ -344,14 +393,26 @@ def convertObservations(inatObservations):
     unitFacts = appendFact(unitFacts, inat, "out_of_range")
     unitFacts = appendFact(unitFacts, inat, "taxon_geoprivacy")
     unitFacts = appendFact(unitFacts, inat, "geoprivacy")
-    unitFacts = appendFact(unitFacts, inat, "context_geoprivacy")
-    unitFacts = appendFact(unitFacts, inat, "context_user_geoprivacy")
-    unitFacts = appendFact(unitFacts, inat, "context_taxon_geoprivacy")
+#    unitFacts = appendFact(unitFacts, inat, "context_geoprivacy") # not used anymore?
+#    unitFacts = appendFact(unitFacts, inat, "context_user_geoprivacy") # not used anymore?
+#    unitFacts = appendFact(unitFacts, inat, "context_taxon_geoprivacy") # not used anymore?
     unitFacts = appendFact(unitFacts, inat, "comments_count")
     unitFacts = appendFact(unitFacts, inat, "num_identification_agreements")
     unitFacts = appendFact(unitFacts, inat, "num_identification_disagreements")
     unitFacts = appendFact(unitFacts, inat, "owners_identification_from_vision")
     unitFacts = appendFact(unitFacts, inat, "oauth_application_id")
+
+
+    # Misc keywords
+    keywords = appendKeyword(keywords, inat, "out_of_range")
+    keywords = appendKeyword(keywords, inat, "identifications_most_agree")
+    keywords = appendKeyword(keywords, inat, "identifications_most_disagree")
+    keywords = appendKeyword(keywords, inat, "owners_identification_from_vision")
+
+    if not inat["oauth_application_id"]:
+      inat["oauth_application_id"] = 999 # Fake value for web client
+
+    keywords.append("oauth_" + str(inat["oauth_application_id"]))
 
 
     # -------------------------------------
