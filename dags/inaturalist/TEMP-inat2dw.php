@@ -64,65 +64,7 @@ function observationInat2Dw($inat) {
 
   }
 
-
-  // Photos
-  $photoCount = count($inat['observation_photos']);
-  if ($photoCount >= 1) {
-    array_push($keywordsArr, "has_images"); // not needed if we use media object
-    foreach ($inat['observation_photos'] as $photoNro => $photo) {
-      
-      // Facts
-      $factsArr = factsArrayPush($factsArr, "U", "imageId", $photo['photo']['id']); // Photo id
-      $factsArr = factsArrayPush($factsArr, "U", "imageUrl", "https://www.inaturalist.org/photos/" . $photo['photo']['id']); // Photo link
-
-      // CC-licensed photos via proxy
-      if (!empty($photo['photo']['license_code'])) {
-        $squareUrl = $photo['photo']['url'];
-
-        $thumbnailUrl = str_replace("square", "small", $squareUrl);
-        $thumbnailUrl = str_replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/", $thumbnailUrl); // TODO: refactor into helper
-
-        $fullUrl = str_replace("square", "original", $squareUrl);
-        $fullUrl = str_replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/", $fullUrl); // TODO: refactor
-
-        $media = Array();
-
-        $media['thumbnailURL'] = $thumbnailUrl;
-        $media['copyrightOwner'] = $photo['photo']['attribution'];
-        $media['author'] = $photo['photo']['attribution']; // TODO: or simply observer name
-        $media['fullURL'] = $fullUrl;
-        $media['licenseId'] = getLicenseUrl($photo['photo']['license_code']);
-        $media['mediaType'] = "IMAGE";
-
-        $dw['publicDocument']['gatherings'][0]['units'][0]['media'][] = $media;
-      }
-      else {
-        array_push($keywordsArr, "image_arr"); // keyword for all rights reserved -images. Will be given if at least one photo is missing license.
-      }
-
-    }
-    $factsArr = factsArrayPush($factsArr, "U", "imageCount", $photoCount);
-  }
-
-  // Sounds
-  // Note: if audio is linked via proxy, need to check that cc-license is given 
-  $soundCount = count($inat['sounds']);
-  if ($soundCount >= 1) {
-    array_push($keywordsArr, "has_audio"); // not needed if we use media object
-    foreach ($inat['sounds'] as $soundNro => $sound) {
-      $factsArr = factsArrayPush($factsArr, "U", "audioId", $sound['id']); // Sound id
-      $factsArr = factsArrayPush($factsArr, "U", "audioUrl", $sound['file_url']); // Sound link
-    }
-    $factsArr = factsArrayPush($factsArr, "U", "audioCount", $soundCount);
-  }
-
-  if (FALSE == $soundCount && FALSE == $photoCount) {
-    array_push($keywordsArr, "no_media"); // To search for obs which cannot be verified
-  }
-
-
-
-
+  
   // Annotations
   if (!empty($inat['annotations'])) {
     foreach ($inat['annotations'] as $annotationNro => $annotation) {

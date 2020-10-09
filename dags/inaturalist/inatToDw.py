@@ -294,9 +294,12 @@ def convertObservations(inatObservations):
     photoCount = len(inat['observation_photos'])
     if photoCount >= 1:
       unit['media'] = []
+      keywords.append("has_photos") # Needed for combined photo & image search
       unitFacts.append({"imageCount": photoCount})
-      keywords.append(str(photoCount) + "_photos")
       arrImagesIncluded = False
+
+      if photoCount > 4:
+        keywords.append("over_4_photos")
 
       for nro, photo in enumerate(inat['observation_photos']):
         # Facts
@@ -316,6 +319,22 @@ def convertObservations(inatObservations):
 
     # Sounds
     soundCount = len(inat['sounds'])
+    # Note: if audio is later linked via proxy, need to check that cc-license is given 
+    if soundCount >= 1:
+      keywords.append("has_sounds") # Needed for combined photo & image search
+      unitFacts.append({"soundCount": soundCount})
+
+      if soundCount > 1:
+        keywords.append("over_1_sounds")
+
+      for nro, sound in enumerate(inat['sounds']):
+        unitFacts.append({"audioId": sound['id']})
+        unitFacts.append({"audioUrl": sound['file_url']})
+
+
+    # Any media
+    if 0 == soundCount and 0 == photoCount:
+      keywords.append("no_media")
 
 
     # Observation fields

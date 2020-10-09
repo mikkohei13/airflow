@@ -16,6 +16,7 @@ puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html
 (joku)hopeatäplä 53608382 - coll and trad projects, obs fields (also negative)
 ohdakeperhonen 39330050 - locality names
 parmaj 61948403 - kaupunkilinnut, 9 photos
+cerfam 61079103 - kaupunkilinnt, 2 photos 1 sound
 """
 
 print("Start") 
