@@ -123,13 +123,13 @@ def getLicenseUrl(licenseCode):
   licenses["cc-by-nc-nd"] = "http://tun.fi/MZ.intellectualRightsCC-BY-NC-ND-4.0"
   licenses["cc-by-nc-sa"] = "http://tun.fi/MZ.intellectualRightsCC-BY-NC-SA-4.0"
 
-  if False == licenseCode:
+  if not licenseCode:
     return "http://tun.fi/MZ.intellectualRightsARR"
   else:
     if licenseCode in licenses:
       return licenses[licenseCode]
     else:
-      print("Unknown license code " + licenseCode)
+      print("Unknown license code " + str(licenseCode))
       return "http://tun.fi/MZ.intellectualRightsARR"
 
 
