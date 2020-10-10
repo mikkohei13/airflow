@@ -64,4 +64,107 @@ def getCoordinates(inat):
 
 
 def convertTaxon(taxon):
-  return taxon
+  convert = {}
+
+  convert['Life'] = "Biota"
+  convert['unknown'] = "Biota"
+  convert['Elämä'] = "Biota" # Is this needed?
+  convert['tuntematon'] = "Biota" # Is this needed?
+
+  convert['Taraxacum officinale'] = "Taraxacum"
+  convert['Alchemilla vulgaris'] = "Alchemilla"
+  convert['Pteridium aquilinum'] = "Pteridium pinetorum"
+  convert['Ranunculus auricomus'] = "Ranunculus auricomus -ryhmä s. lat."
+  convert['Bombus lucorum-complex'] = "Bombus lucorum coll."
+  convert['Chrysoperla carnea-group'] = "Chrysoperla"
+  convert['Potentilla argentea'] = "Potentilla argentea -ryhmä"
+  convert['Chenopodium album'] = "Chenopodium album -ryhmä"
+  convert['Imparidentia'] = "Heterodonta" # hieta- ja liejusimpukan alin yhteinen taksoni
+  convert['Canis familiaris'] = "Canis lupus familiaris" # koira
+
+  if not taxon: # Empty, False, Null/None
+    return "Biota"  
+  elif taxon in convert:
+    return convert[taxon]
+  else:
+    return taxon
+
+
+def summarizeAnnotation(annotation):
+  """
+  Annotations describe three attributes (see them below.)
+
+  The logic is complicated, and there's no official documentation about it.
+  - Someone creates an observation.
+  - Someone creates an annotation for an attribute.
+  - Someone adds a value to that attribute.
+  - Anyone can vote for or agains that value, but cannot create a competing value.
+
+  In the API, vote_score shows the outcome of the voting. positive=agree, 0=tie, negative=disagree
+
+  Attributes (= keys):
+  1=Life Stage, 9=Sex, 12=Plant Phenology, 17=Live or dead
+
+  Values:
+  Life Stage: 2=Adult, 3=Teneral, 4=Pupa, 5=Nymph, 6=Larva, 7=Egg, 8=Juvenile, 16=Subimago
+  Sex: 10=Female, 11=Male
+  Plant Phenology: 13=Flowering, 14=Fruiting, 15=Budding
+  Live or dead: 18=Live, ?=Dead
+
+  See in main conversion script how the result is submitted to DW.
+
+  See more at https://forum.inaturalist.org/t/how-to-use-inaturalists-search-urls-wiki/63
+  """
+
+  key = annotation["controlled_attribute_id"]
+  value = annotation["controlled_value_id"]
+  vote_score = annotation["vote_score"]
+
+  if 2 == value:
+    key = "lifeStage"
+    value = "ADULT"
+  elif 4 == value:
+    key = "lifeStage"
+    value = "PUPA"
+  elif 5 == value:
+    key = "lifeStage"
+    value = "NYMPH"
+  elif 6 == value:
+    key = "lifeStage"
+    value = "LARVA"
+  elif 7 == value:
+    key = "lifeStage"
+    value = "EGG"
+  elif 8 == value:
+    key = "lifeStage"
+    value = "JUVENILE"
+  elif 16 == value:
+    key = "lifeStage"
+    value = "SUBIMAGO"
+  elif 13 == value:
+    key = "lifeStage"
+    value = "FLOWER"
+  elif 10 == value:
+    key = "sex"
+    value = "FEMALE"
+  elif 11 == value:
+    key = "sex"
+    value = "MALE"
+  else:
+    pass
+
+
+  if vote_score >= 1:
+    return key, value
+
+  elif vote_score <= -1:
+    print("Annotation " + str(key) + " = " + str(value) + " was voted against by " + str(vote_score))
+    return "keyword", "annotation_against"
+
+  elif 0 == vote_score:
+    print("Annotation " + str(key) + " = " + str(value) + " vote tied")
+    return "keyword", "annotation_tie"
+
+
+
+

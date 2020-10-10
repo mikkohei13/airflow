@@ -19,6 +19,7 @@ NOTES/POSSIBLY TODO:
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
 - Filter out unwanter users (e.g. test users: testaaja, outo)
 - Previously used copyright string, now just user name for photo attribution, since license in separate field.
+- unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field is unclear.
 
 Misc facts left out:
 "observerActivityCount" // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
@@ -230,14 +231,14 @@ def convertObservations(inatObservations):
 
 
     # Taxon
-    # scientific name iNat interprets this to be, special cases converted by this script to match FinBIF taxonomy
+    # Scientific name iNat interprets this to be, special cases converted to match FinBIF taxonomy
     unit['taxonVerbatim'] = inatHelpers.convertTaxon(inat['taxon']['name'])
 
-#    // name observer or identifiers(?) have given, can be any language
-#    $factsArr = factsArrayPush($factsArr, "U", "taxonByUser", handleTaxon($inat['species_guess']));
+    # Name observer or identifiers(?) have given, can be any language
+    unitFacts.append({"species_guess": inat['species_guess']})
 
-#    // scientific name iNat interprets this to be
-#    $factsArr = factsArrayPush($factsArr, "U", "taxonInterpretationByiNaturalist", $inat['taxon']['name']);
+    # Scientific name iNat interprets this to be
+    unitFacts.append({"taxonInterpretationByiNaturalist": inat['taxon']['name']})
 
 
     # Observer
@@ -376,6 +377,29 @@ def convertObservations(inatObservations):
 
     # License URL's/URI's
     publicDocument['licenseId'] = getLicenseUrl(inat['license_code'])
+
+
+    # Annotations
+    if inat['annotations']:
+      keywords.append("has_annotations")
+
+      for nro, annotation in enumerate(inat['annotations']):
+        key, value = inatHelpers.summarizeAnnotation(annotation)
+
+        # Annotations voted against or tie, saved only as keyword
+        if "keyword" == key:
+          keywords.append(value)
+        # Annotation voted for, added as unit fact
+        else:
+          factName = "annotation_" + str(key)
+          unitFacts.append({factName: str(value)})
+
+        # Annotations with native values in DW:
+        if "lifeStage" == key:
+          unit['lifeStage'] = value
+        elif "sex" == key:
+          unit['sex'] = value
+
 
 
     # Quality metrics
