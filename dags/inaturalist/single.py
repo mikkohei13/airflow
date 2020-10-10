@@ -17,6 +17,10 @@ puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html
 ohdakeperhonen 39330050 - locality names
 parmaj 61948403 - kaupunkilinnut, 9 photos
 cerfam 61079103 - kaupunkilinnt, 2 photos 1 sound
+mittari 60201865 - karkeistettu
+sieni lehdellä 60934016 - yksityinen
+sammal 62132113 - ei koordinaattien tarkkuutta
+
 """
 
 print("Start") 

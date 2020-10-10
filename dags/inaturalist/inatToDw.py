@@ -3,10 +3,17 @@
 import pprint
 import json # for debug
 
+import inatHelpers
+
 """
+BUGFIXES:
+- If quality was less than -1, not marked as unreliable. Must reprocess all.
+- If obs had multiple ARR images, multiple image_arr keywords were set.
+- Obscured obs coordinate box was calculated incorrectly
+- Obscured obs accuracy was set to 0
+
+
 NOTES/POSSIBLY TODO:
-- There was bug in the PHP version: if quality was less than -1, not marked as unreliable. Must reprocess all.
-- There was bug in PHO: if obs had multiple ARR images, multiple image_arr keywords were set.
 - DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flagged media files, e.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
@@ -83,7 +90,7 @@ def summarizeQualityMetrics(quality_metrics):
   summary = {}
 
   for nro, vote in enumerate(quality_metrics):
-    # Skip vote if spam or suspended user
+    # Skip vote if spam or suspended user, NOT TESTED
     if vote["user"]["spam"]:
       continue
     if vote["user"]["suspended"]:
@@ -434,6 +441,14 @@ def convertObservations(inatObservations):
     keywords.append("oauth_" + str(inat["oauth_application_id"]))
 
 
+    # Coordinates
+    # TODO: test with obs without coord
+    if inat['mappable']:
+      coord = inatHelpers.getCoordinates(inat)
+      print(coord)
+
+
+
     # -------------------------------------
     # Build the multidimensional dictionary
 
@@ -450,6 +465,7 @@ def convertObservations(inatObservations):
     publicDocument['gatherings'].append(gathering)
 
     dw['publicDocument'] = publicDocument
+
 
     dwObservations.append(dw)
     print("Converted obs " + str(inat["id"]))
