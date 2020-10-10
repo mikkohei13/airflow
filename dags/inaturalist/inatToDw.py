@@ -35,6 +35,8 @@ DW data features:
 
 
 def skipObservation(inat):
+  # Note: This is only for skipping observations that don't YET have enough infor to be worthwhile to be included to DW. Don't skip e.g. spam here, because then spammy observations would stay in DW forever. Instead mark them as having issues.
+
   if not inat["taxon"]:
     print("Skipping observation " + str(inat["id"]) + " without taxon.")
     return True
@@ -420,6 +422,7 @@ def convertObservations(inatObservations):
     unit["quality"] = {}
     unit["quality"]["issue"] = {}
 
+    # TODO: Refactor and test
     # Negative quality metrics (thumbs down) 
     # TODO: Check: does this make issue, or mark as unreliable, or both on Laji.fi?
     if qualityMetricUnreliable:
@@ -435,10 +438,29 @@ def convertObservations(inatObservations):
       unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
       keywords.append("flagged")
 
+    # TODO: Has not been tested!
+    if inat["spam"]:
+      publicDocument['concealment'] = "PRIVATE"
+      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
+      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      keywords.append("spam")
+
+    # TODO: Has not been tested!
+    if inat["user"]["spam"]:
+      publicDocument['concealment'] = "PRIVATE"
+      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
+      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      keywords.append("spam_user")
+
+    # TODO: Maybe hide obs from suspended users?
+#    if inat["user"]["suspended"]:
+
+
 
     # Quality grade
     unitFacts.append({"quality_grade": inat['quality_grade'] + "_grade"})
     keywords.append(inat['quality_grade'] + "_grade")
+
 
     # Quality tags
     if "research" == inat['quality_grade']:
@@ -458,6 +480,7 @@ def convertObservations(inatObservations):
     unitFacts = appendFact(unitFacts, inat, "num_identification_disagreements")
     unitFacts = appendFact(unitFacts, inat, "owners_identification_from_vision")
     unitFacts = appendFact(unitFacts, inat, "oauth_application_id")
+    unitFacts = appendFact(unitFacts, inat, "identifications_count")
 
 
     # Misc keywords
@@ -465,6 +488,9 @@ def convertObservations(inatObservations):
     keywords = appendKeyword(keywords, inat, "identifications_most_agree")
     keywords = appendKeyword(keywords, inat, "identifications_most_disagree")
     keywords = appendKeyword(keywords, inat, "owners_identification_from_vision")
+
+    if inat["faves_count"] >= 3:
+      keywords.append("favourite"))
 
     if not inat["oauth_application_id"]:
       inat["oauth_application_id"] = 999 # Fake value for web client
