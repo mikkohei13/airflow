@@ -229,6 +229,17 @@ def convertObservations(inatObservations):
     dw["id"] = inat["id"] # The original id is needed for returning lastUpdateKey, so do not remove it here! TODO maybe: this function returns the id, then inat.py uses it only if posting was successful
 
 
+    # Taxon
+    # scientific name iNat interprets this to be, special cases converted by this script to match FinBIF taxonomy
+    unit['taxonVerbatim'] = inatHelpers.convertTaxon(inat['taxon']['name'])
+
+#    // name observer or identifiers(?) have given, can be any language
+#    $factsArr = factsArrayPush($factsArr, "U", "taxonByUser", handleTaxon($inat['species_guess']));
+
+#    // scientific name iNat interprets this to be
+#    $factsArr = factsArrayPush($factsArr, "U", "taxonInterpretationByiNaturalist", $inat['taxon']['name']);
+
+
     # Observer
     # Observer name, prefer full name over loginname
     if inat['user']['name']:
@@ -444,9 +455,7 @@ def convertObservations(inatObservations):
     # Coordinates
     # TODO: test with obs without coord
     if inat['mappable']:
-      coord = inatHelpers.getCoordinates(inat)
-      print(coord)
-
+      gathering['coordinates'] = inatHelpers.getCoordinates(inat)
 
 
     # -------------------------------------

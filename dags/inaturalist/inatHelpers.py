@@ -1,6 +1,7 @@
 
 import math
 
+
 def decimalFloor(n, decimals=1):
   multiplier = 10 ** decimals
   return str(math.floor(n * multiplier) / multiplier)
@@ -59,6 +60,8 @@ def getCoordinates(inat):
     coord['latMin'] = lat;
     coord['latMax'] = lat;  
 
-  print(coord)
+  return coord
 
-  return "COORD"
+
+def convertTaxon(taxon):
+  return taxon
