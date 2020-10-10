@@ -6,34 +6,30 @@ import json # for debug
 import inatHelpers
 
 """
-BUGFIXES:
+BUGFIXES COMPARED TO PHP VERSION 9/2020:
 - If quality was less than -1, not marked as unreliable. Must reprocess all.
 - If obs had multiple ARR images, multiple image_arr keywords were set.
 - Obscured obs coordinate box was calculated incorrectly
 - Obscured obs accuracy was set to 0
+- Annotations were saved incorrectly, so that also negative and tied votes resulted in positive annotation and fact.
 
-
-NOTES/POSSIBLY TODO:
-- DW removes/hides humans, so handling them here is not needed. (Used to make private, remove images and description.)
-- What to do if observation contains 1...n copyright infringement flagged media files, e.g. https://www.inaturalist.org/observations/46356508
+NOTES/CHANGES COMPARED TO PHP VERSION 9/2020:
+- Script expects that all observations are from Finland, so it fills in hardcoded country name. Must change this if also foreign observations ar handled.
+- DW removes/hides humans, so handling them here is not needed. (Used to make them private, remove images and description.)
+- What to do if observation contains 1...n copyright infringement flagged media files? E.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
-- Filter out unwanter users (e.g. test users: testaaja, outo)
+- Possibly TODO: Filter out unwanter users (e.g. test users: testaaja, outo)
 - Previously used copyright string, now just user name for photo attribution, since license in separate field.
-- unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field is unclear.
-
-Misc facts left out:
-"observerActivityCount" // This is problematic because it increases over time -> is affected by *when* the observation was fetched from iNat
-
-iNat API features:
-- This conversion expects that all observations are from Finland, and are filtered by the API call. If changed, need to remove hard-coded country name here.
-- Quality metrics appear on the api after a delay (15 mins?)
-- 
+- Unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field is unclear.
+- observerActivityCount should not be used, since it increases over time -> is affected by *when* the observation was fetched from iNat.
+- Note that at least annotations and quality metrics appear on the api after a delay (c. 15 mins cache?)
 
 DW data features:
 - There can be multiple facts with the same name
 - Facts are strings
 - Fields can be left blank
 - Enum values are ALL-CAPS
+- Can there be multiple similar keywords?
 
 """
 
