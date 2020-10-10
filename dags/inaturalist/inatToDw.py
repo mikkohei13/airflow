@@ -489,9 +489,18 @@ def convertObservations(inatObservations):
     keywords = appendKeyword(keywords, inat, "identifications_most_disagree")
     keywords = appendKeyword(keywords, inat, "owners_identification_from_vision")
 
-    if inat["faves_count"] >= 3:
-      keywords.append("favourite"))
 
+    # Faves
+    if inat["faves_count"] >= 1:
+      keywords.append("faved")
+
+    if inat["faves_count"] >= 5:
+      keywords.append("many_faved")
+    elif inat["faves_count"] >= 3:
+      keywords.append("few_faved")
+
+
+    # Application used to save the obs
     if not inat["oauth_application_id"]:
       inat["oauth_application_id"] = 999 # Fake value for web client
 
