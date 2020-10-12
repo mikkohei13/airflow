@@ -6,9 +6,8 @@ import json
 from airflow.models import Variable
 
 
-# TODO: param for staging / prod
 def postSingle(dwObs, target):
-  dwObsJson = json.dumps(dwObs)
+#  dwObsJson = json.dumps(dwObs)
 #  print(dwObsJson)
 #  exit()
 
@@ -23,7 +22,7 @@ def postSingle(dwObs, target):
 
   # Sending post request and saving the response as response object 
   print("Pushing to " + targetUrl)
-  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+  targetResponse = requests.post(url = targetUrl, json = dwObs) 
 
   if 200 == targetResponse.status_code:
     print("API responded " + str(targetResponse.status_code))
@@ -36,7 +35,7 @@ def postSingle(dwObs, target):
 
 
 def postMulti(dwObs, target):
-  dwObsJson = json.dumps(dwObs)
+#  dwObsJson = json.dumps(dwObs)
 
   if "staging" == target:
     print("Pushing to staging API.")
@@ -48,7 +47,7 @@ def postMulti(dwObs, target):
 
   # sending post request and saving the response as response object 
   print("Pushing to " + targetUrl)
-  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+  targetResponse = requests.post(url = targetUrl, json = dwObs) 
 
   if 200 == targetResponse.status_code:
     print("Mock API responded " + str(targetResponse.status_code))
@@ -63,11 +62,10 @@ def postSingleMock(dwObs, mock):
   print("Pushing to mock API.")
   airflowVariable_token = Variable.get("inat_mock_token")
 
-  dwObsJson = json.dumps(dwObs)
   targetUrl = "https://14935.mocklab.io/inat"
 
   # Sending post request and saving the response as response object 
-  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+  targetResponse = requests.post(url = targetUrl, json = dwObs) 
 #  print(targetResponse)
 
   if 200 == targetResponse.status_code:
@@ -83,11 +81,10 @@ def postMultiMock(dwObs, lastUpdateKey):
   print("Pushing to mock API.")
   airflowVariable_token = Variable.get("inat_mock_token")
 
-  dwObsJson = json.dumps(dwObs)
   targetUrl = "https://14935.mocklab.io/inat"
 
   # sending post request and saving the response as response object 
-  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+  targetResponse = requests.post(url = targetUrl, json = dwObs) 
 
   if 200 == targetResponse.status_code:
     print("Mock API responded " + str(targetResponse.status_code))
