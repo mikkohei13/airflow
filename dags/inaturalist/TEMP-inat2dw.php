@@ -13,32 +13,6 @@ function observationInat2Dw($inat) {
 
   */
 
-  
-  // Annotations
-  if (!empty($inat['annotations'])) {
-    foreach ($inat['annotations'] as $annotationNro => $annotation) {
-      $anno = handleAnnotation($annotation);
-      $factsArr = factsArrayPush($factsArr, "U", $anno['attribute'], $anno['value']);
-      
-      if (isset($anno['dwLifeStage'])) {
-        $dw['publicDocument']['gatherings'][0]['units'][0]['lifeStage'] = $anno['dwLifeStage'];
-      }
-      if (isset($anno['dwSex'])) {
-        $dw['publicDocument']['gatherings'][0]['units'][0]['sex'] = $anno['dwSex'];
-      }
-    }
-  }
-
-
-  // Taxon
-  // scientific name iNat interprets this to be, special cases converted by this script to match FinBIF taxonomy
-  $dw['publicDocument']['gatherings'][0]['units'][0]['taxonVerbatim'] = handleTaxon($inat['taxon']['name']);
-
-  // name observer or identifiers(?) have given, can be any language
-  $factsArr = factsArrayPush($factsArr, "U", "taxonByUser", handleTaxon($inat['species_guess']));
-
-  // scientific name iNat interprets this to be
-  $factsArr = factsArrayPush($factsArr, "U", "taxonInterpretationByiNaturalist", $inat['taxon']['name']);
 
 
   // ----------------------------------------------------------------------------------------

@@ -25,7 +25,6 @@ def getCoordinates(inat):
       coord['lonMin'] = decimalFloor(lonRaw)
       coord['lonMax'] = decimalFloor((lonRaw + 0.2))
     else:
-      print("lon odd")
       coord['lonMin'] = decimalFloor((lonRaw - 0.1))
       coord['lonMax'] = decimalFloor((lonRaw + 0.1))
       print("lonMin: " + str(coord['lonMin']))

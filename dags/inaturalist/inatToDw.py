@@ -198,6 +198,12 @@ def convertObservations(inatObservations):
     documentFacts = []
     gatheringFacts = []
     unitFacts = []
+    
+    # Init empty values
+    gathering['notes'] = ""
+    unit['sourceTags'] = []
+    unit["quality"] = {}
+    unit["quality"]["issue"] = {}
 
     # -------------------------------------
     # Conversions
@@ -264,8 +270,8 @@ def convertObservations(inatObservations):
 
 
     # Description
-    if "description" in inat: # TODO: This line not needed, even if desc would be missing??
-      gathering['notes'] = inat["description"]
+    if inat["description"]:
+      gathering['notes'] = gathering['notes'] + inat["description"]
 
 
     # Wildness
@@ -363,6 +369,7 @@ def convertObservations(inatObservations):
 
 
     # Record basis
+    # TODO: Refactor into function
     if hasSpecimen:
       unit['recordBasis'] = "PRESERVED_SPECIMEN"
     elif photoCount >= 1:
@@ -418,39 +425,31 @@ def convertObservations(inatObservations):
 
 
     # Quality on DW
-    # Init
-    unit["quality"] = {}
-    unit["quality"]["issue"] = {}
 
     # TODO: Refactor and test
     # Negative quality metrics (thumbs down) 
     # TODO: Check: does this make issue, or mark as unreliable, or both on Laji.fi?
     if qualityMetricUnreliable:
-      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
-      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      unit['sourceTags'].append("EXPERT_TAG_UNCERTAIN")
       keywords.append("quality-metric-unreliable")
+
 
     # Flags
     # TODO: Has not been tested!
     if inat["flags"]:
-      publicDocument['concealment'] = "PRIVATE" # Mark private, because might be flagged due to copyright or privacy reasons.
-      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
-      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
+      unit['sourceTags'].append("EXPERT_TAG_UNCERTAIN")
       keywords.append("flagged")
+      gathering['notes'] = gathering['notes'] + "\n\[Observation flagged on iNaturalist as problematic or duplicate.]"
 
     # TODO: Has not been tested!
     if inat["spam"]:
-      publicDocument['concealment'] = "PRIVATE"
-      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
-      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
-      keywords.append("spam")
+      unit['sourceTags'].append("ADMIN_MARKED_SPAM")
+      keywords.append("spam-observation")
 
     # TODO: Has not been tested!
     if inat["user"]["spam"]:
-      publicDocument['concealment'] = "PRIVATE"
-      unit["quality"]["issue"]["issue"] = "REPORTED_UNRELIABLE"
-      unit["quality"]["issue"]["source"] = "ORIGINAL_DOCUMENT"
-      keywords.append("spam_user")
+      unit['sourceTags'].append("ADMIN_MARKED_SPAM")
+      keywords.append("spam-user")
 
     # TODO: Maybe hide obs from suspended users?
 #    if inat["user"]["suspended"]:
@@ -464,7 +463,6 @@ def convertObservations(inatObservations):
 
     # Quality tags
     if "research" == inat['quality_grade']:
-      unit['sourceTags'] = []
       unit['sourceTags'].append("COMMUNITY_TAG_VERIFIED")
 
 
