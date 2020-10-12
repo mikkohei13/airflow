@@ -16,26 +16,33 @@ def printObject(object):
 
 
 
-
 ### SETUP
 
 print("Start") 
+
+
+#TODO: Args for production vs staging
+target = "staging" # production | staging
 
 # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
 now = datetime.datetime.now()
 thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
-# Puolukkapiiloyökkönen 60063865
-airflowVariable_inat_latest_obs_id = Variable.get("inat_latest_obs_id")
-airflowVariable_inat_latest_update = Variable.get("inat_latest_update")
+# Get latest update data from Airflow variables
+if "staging" == target:
+  airflowVariable_inat_latest_obs_id = Variable.get("inat_staging_latest_obs_id")
+elif "production" == target:
+  airflowVariable_inat_latest_update = Variable.get("inat_production_latest_update")
 
-airflowVariable_inat_latest_obs_id = 60063865 # debug
+#airflowVariable_inat_latest_obs_id = 60063865 # debug
+
 
 # GET
 
 i = 0 # debug
 
-lastUpdateKey = 0 # Just in case, should be returned with conversion function
+# TODO: refactor name to "latestObsId"
+lastUpdateKey = 0 # Just in case, should be returned with conversion function. TODO: remove this loc
 
 # For each pageful of data
 for multiObservationDict in getInat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
@@ -48,18 +55,24 @@ for multiObservationDict in getInat.getUpdatedGenerator(airflowVariable_inat_lat
     break;
 
   # CONVERT
-  dwObservations = inatToDw.convertObservations(multiObservationDict['results'])
+  dwObservation, lastUpdateKey = inatToDw.convertObservations(multiObservationDict['results'])
 
   print(dwObservations)
 
+
   # POST
-  lastUpdateKey = postDw.postMultiMock(dwObservations)
+  # TODO: set production vs staging
+  postSuccess = postDw.postMultiMock(dwObservations, target)
 
   # If this pageful contained data, and was saved successfully to DW, set lastUpdateKey as variable
-  if lastUpdateKey > 0:
-    print("lastUpdateKey: " + str(lastUpdateKey))
-#   Variable.set("inat_latest_obs_id", lastUpdateKey) # UNCOMMENT THIS TO USE VARS
-
+  if postSuccess:
+    if "staging" == target:
+      Variable.set("inat_staging_latest_obs_id", lastUpdateKey)
+      Variable.set("inat_staging_latest_update", thisUpdateTime)
+    elif "production" == target:
+      Variable.set("inat_production_latest_obs_id", lastUpdateKey)
+      Variable.set("inat_staging_latest_update", thisUpdateTime)
+      
 
 
 # If whole process was successful

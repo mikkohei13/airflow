@@ -6,9 +6,7 @@ import getInat
 import inatToDw
 import postDw
 
-import json # for debug
-
-### SETUP
+import json
 
 """
 Test observations
@@ -28,28 +26,30 @@ https://www.inaturalist.org/flags?commit=Suodata&flaggable_type=Observation&flag
 """
 
 # Input
+# TODO: Input validation?
 id = sys.argv[1] # id of the iNat observation
-mode = sys.argv[2] # dry | prod
+target = sys.argv[2] # dry | production
 
 
 # Get and transform data
 singleObservationDict = getInat.getSingle(id)
 
-dwObservation = inatToDw.convertObservations(singleObservationDict['results'])
+dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'])
+
+print("TEMP DEBUG lastUpdateKey: " + str(lastUpdateKey))
 
 
 # Output
 pp = pprint.PrettyPrinter(indent=2)
 
-if "prod" == mode:
-  print("Pushing to DW")
-  # TODO: push to DW
+if "staging" == target or "production" == target:
+  postDw.postSingle(dwObservation, target)
 
-else:
-  if "dry-verbose" == mode:
-    print("INAT:")
-    print(singleObservationDict['results'])
+if "dry-verbose" == target:
+  print("INAT:")
+  print(singleObservationDict['results'])
 
+if "dry-verbose" == target or "dry" == target:
   print("--------------------------------------------------------------")
   print("DW:")
   pp.pprint(dwObservation)

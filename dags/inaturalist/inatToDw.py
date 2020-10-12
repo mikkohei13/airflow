@@ -169,10 +169,11 @@ def convertObservations(inatObservations):
   """
 
   dwObservations = []
+  lastUpdateKey = 0
 
   # For each observation
   for nro, inat in enumerate(inatObservations):
-
+    
     # Debug
 #    jsonData = json.dumps(inat)
 #    print(jsonData)
@@ -209,8 +210,8 @@ def convertObservations(inatObservations):
     # Conversions
 
     # Data shared by all observations
-    # TODO: select prod/dev coll ... how?
-    collectionId = "http://tun.fi/HR.3211" # Prod: HR.3211 Test: HR.11146
+    # TODO: select production/dev coll ... how?
+    collectionId = "http://tun.fi/HR.3211" # production: HR.3211 Test: HR.11146
     dw["collectionId"] = collectionId
     publicDocument['collectionId'] = collectionId
 
@@ -230,8 +231,6 @@ def convertObservations(inatObservations):
     documentFacts.append({"catalogueNumber": inat['id']})
     documentFacts.append({"referenceURI": inat['uri']})
     keywords.append(str(inat['id'])) # id has to be string
-
-    dw["id"] = inat["id"] # The original id is needed for returning lastUpdateKey, so do not remove it here! TODO maybe: this function returns the id, then inat.py uses it only if posting was successful
 
 
     # Taxon
@@ -400,6 +399,7 @@ def convertObservations(inatObservations):
           unitFacts.append({factName: str(value)})
 
         # Annotations with native values in DW:
+        # TODO: test
         if "lifeStage" == key:
           unit['lifeStage'] = value
         elif "sex" == key:
@@ -411,7 +411,6 @@ def convertObservations(inatObservations):
     qualityMetricUnreliable = False
     if "quality_metrics" in inat:
       qualityMetricsSummary = summarizeQualityMetrics(inat["quality_metrics"])
-      print(qualityMetricsSummary)
 
       for metric, value in qualityMetricsSummary.items():
         # Add to facts
@@ -530,8 +529,18 @@ def convertObservations(inatObservations):
 
 
     dwObservations.append(dw)
+
+    # Store last converted observation
+    lastUpdateKey = inat["id"]
+
     print("Converted obs " + str(inat["id"]))
+
 
   # End for each observations
 
-  return dwObservations
+  # Root elements for DW
+  dwRoot = {}
+  dwRoot["schema"] = "laji-etl"
+  dwRoot["roots"] = dwObservations
+
+  return dwRoot, lastUpdateKey

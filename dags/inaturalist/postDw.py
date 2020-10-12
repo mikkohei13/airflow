@@ -3,29 +3,97 @@
 import requests
 import json
 
-def postSingleMock(dwObs):
-  dwObservationJson = json.dumps(dwObs)
-  targetUrl = "https://14935.mocklab.io/inat"
-
-  # sending post request and saving the response as response object 
-  targetRequest = requests.post(url = targetUrl, data = dwObservationJson) 
-  print(targetRequest)
+from airflow.models import Variable
 
 
-def postMultiMock(dwObservations):
-  # TODO: Decide whther to do this here, or just return true and pick the last successful id in main 
-  lastUpdateKey = dwObservations[-1]["id"]
+# TODO: param for staging / prod
+def postSingle(dwObs, target):
+  dwObsJson = json.dumps(dwObs)
+#  print(dwObsJson)
+#  exit()
 
-  dwObservationsJson = json.dumps(dwObservations)
-  targetUrl = "https://14935.mocklab.io/inat"
+  if "staging" == target:
+    print("Pushing to staging API")
+    targetUrl = "https://apitest.laji.fi/v0/warehouse/push?access_token=" + Variable.get("inat_staging_token")
 
-  # sending post request and saving the response as response object 
-  targetRequest = requests.post(url = targetUrl, data = dwObservationsJson) 
+  elif "production" == target:
+    print("Pushing to production API")
+    targetUrl = "https://api.laji.fi/v0/warehouse/push?access_token=" + Variable.get("inat_production_token")
 
-  if 200 == targetRequest.status_code:
-    print("Mock API responded " + str(targetRequest.status_code))
-    return lastUpdateKey
+
+  # Sending post request and saving the response as response object 
+  print("Pushing to " + targetUrl)
+  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+
+  if 200 == targetResponse.status_code:
+    print("API responded " + str(targetResponse.status_code))
+    return True
+
   else:
-    errorCode = str(targetRequest.status_code)
+    errorCode = str(targetResponse.status_code)
+    print(targetResponse.text)
+    raise Exception(f"API responded with error {errorCode}")
+
+
+def postMulti(dwObs, target):
+  dwObsJson = json.dumps(dwObs)
+
+  if "staging" == target:
+    print("Pushing to staging API.")
+    targetUrl = "https://apitest.laji.fi/v0/warehouse/push?access_token=" + Variable.get("inat_staging_token")
+
+  elif "production" == target:
+    print("Pushing to production API")
+    targetUrl = "https://api.laji.fi/v0/warehouse/push?access_token=" + Variable.get("inat_production_token")
+
+  # sending post request and saving the response as response object 
+  print("Pushing to " + targetUrl)
+  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+
+  if 200 == targetResponse.status_code:
+    print("Mock API responded " + str(targetResponse.status_code))
+    return True
+
+  else:
+    errorCode = str(targetResponse.status_code)
+    raise Exception(f"Mock API responded with error {errorCode}")
+
+
+def postSingleMock(dwObs, mock):
+  print("Pushing to mock API.")
+  airflowVariable_token = Variable.get("inat_mock_token")
+
+  dwObsJson = json.dumps(dwObs)
+  targetUrl = "https://14935.mocklab.io/inat"
+
+  # Sending post request and saving the response as response object 
+  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+#  print(targetResponse)
+
+  if 200 == targetResponse.status_code:
+    print("Mock API responded " + str(targetResponse.status_code))
+    return True
+
+  else:
+    errorCode = str(targetResponse.status_code)
+    raise Exception(f"Mock API responded with error {errorCode}")
+
+
+def postMultiMock(dwObs, lastUpdateKey):
+  print("Pushing to mock API.")
+  airflowVariable_token = Variable.get("inat_mock_token")
+
+  dwObsJson = json.dumps(dwObs)
+  targetUrl = "https://14935.mocklab.io/inat"
+
+  # sending post request and saving the response as response object 
+  targetResponse = requests.post(url = targetUrl, json = dwObsJson) 
+
+  if 200 == targetResponse.status_code:
+    print("Mock API responded " + str(targetResponse.status_code))
+    return True
+
+  else:
+    errorCode = str(targetResponse.status_code)
     raise Exception(f"Mock API responded with error {errorCode}")
 

@@ -27,7 +27,6 @@ def getCoordinates(inat):
     else:
       coord['lonMin'] = decimalFloor((lonRaw - 0.1))
       coord['lonMax'] = decimalFloor((lonRaw + 0.1))
-      print("lonMin: " + str(coord['lonMin']))
 
     latRaw = inat['geojson']['coordinates'][1]
     latFirstDigit = int(str(latRaw).split('.')[1][0])
@@ -157,11 +156,11 @@ def summarizeAnnotation(annotation):
     return key, value
 
   elif vote_score <= -1:
-    print("Annotation " + str(key) + " = " + str(value) + " was voted against by " + str(vote_score))
+#    print("Annotation " + str(key) + " = " + str(value) + " was voted against by " + str(vote_score))
     return "keyword", "annotation_against"
 
   elif 0 == vote_score:
-    print("Annotation " + str(key) + " = " + str(value) + " vote tied")
+#    print("Annotation " + str(key) + " = " + str(value) + " vote tied")
     return "keyword", "annotation_tie"
 
 
