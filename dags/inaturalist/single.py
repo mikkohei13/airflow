@@ -22,25 +22,37 @@ sieni lehdellä 60934016 - yksityinen
 sammal 62132113 - ei koordinaattien tarkkuutta
 tolppa 55900883 - quality metrics
 
+Flagged observations to test with:
+https://www.inaturalist.org/flags?commit=Suodata&flaggable_type=Observation&flagger_name=&flagger_type=any&flagger_user_id=&flags%5B%5D=other&page=3&reason_query=&resolved=no&resolver_name=&resolver_user_id=&user_id=&user_name=&utf8=%E2%9C%93
+
 """
 
-print("Start") 
-pp = pprint.PrettyPrinter(indent=2)
-
-# Get arguments
+# Input
 id = sys.argv[1] # id of the iNat observation
 mode = sys.argv[2] # dry | prod
 
-singleObservationDict = getInat.getSingle(id)
 
-if "dry" == mode:
-  print("INAT:")
-  pp.pprint(singleObservationDict['results'])
+# Get and transform data
+singleObservationDict = getInat.getSingle(id)
 
 dwObservation = inatToDw.convertObservations(singleObservationDict['results'])
 
-print("--------------------------------------------------------------")
-print("DW:")
-pp.pprint(dwObservation)
-json = json.dumps(dwObservation)
-print(json)
+
+# Output
+pp = pprint.PrettyPrinter(indent=2)
+
+if "prod" == mode:
+  print("Pushing to DW")
+  # TODO: push to DW
+
+else:
+  if "dry-verbose" == mode:
+    print("INAT:")
+    print(singleObservationDict['results'])
+
+  print("--------------------------------------------------------------")
+  print("DW:")
+  pp.pprint(dwObservation)
+  print("--------------------------------------------------------------")
+  print(json.dumps(dwObservation))
+
