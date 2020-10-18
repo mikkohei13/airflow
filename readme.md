@@ -20,7 +20,7 @@ Then:
 
   docker-compose up; docker-compose down;
 
-Set up latest observation id and update time to Varibales. TODO: instructions.
+Set up api token, latest observation id and update time to Varibales. TODO: instructions.
 
 To test the DAG in Airflow, enable and trigger it manually. 
 
@@ -40,16 +40,21 @@ Get updated observations and post to DW:
 
 # Todo
 
-- Rewrite minimal conversion with python
-- Rewrite all conversions with python (add: no accuracy when coarse location)
-- Create airflow image with version number, and pip requirements incl. bs4
-- Push to staging dw, with token hidden from Git
-- Setup Python IDE
+- Conversion tweaks:
+  - TEST: lisämuuttujat on doc, gath, unit level
+  - ASK: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
+- Test conversions
+  - Are any falses or Nones present in the json? ASK: How would DW handle them?
+  - See TODO's from conversion script
+- Setup delete command
 - Setup (unit) testing
+- Docker-compose with image version numbers?
 - Setup email notifications
 - Store original observations from inat, where?
 - Setup proper env values, password-protect webserver ui
 - Show to colleagues, get feedback
+
+- Setup Python IDE
 
 
 # Testing

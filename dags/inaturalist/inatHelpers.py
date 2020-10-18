@@ -1,6 +1,23 @@
 
 import math
 
+"""
+def appendFact(factsList, factLabel, factValue = False):
+  if factValue: # Checks if value is truthy
+    factsList.append({ "fact": factLabel, "value": factValue })
+
+  return factsList
+"""
+
+def appendRootFact(factsList, inat, factName):
+  # Handles only keys directly under root of inat
+
+  if factName in inat: # Checks if key exists
+    if inat[factName]: # Checks if value is truthy
+      factsList.append({ "fact": factName, "value": inat[factName]} )
+
+  return factsList
+
 
 def decimalFloor(n, decimals=1):
   multiplier = 10 ** decimals

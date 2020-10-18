@@ -47,16 +47,6 @@ def skipObservation(inat):
     return False
 
 
-def appendFact(factsList, inat, factName):
-  # Handles only keys directly under root of inat
-
-  if factName in inat: # Checks if key exists
-    if inat[factName]: # Checks if value is truthy
-      factsList.append({factName: inat[factName]})
-
-  return factsList
-
-
 def appendKeyword(keywordList, inat, keywordName):
   # Handles only keys directly under root of inat
 
@@ -69,13 +59,13 @@ def appendKeyword(keywordList, inat, keywordName):
 
 def appendCollectionProjects(factsList, projects):
   for nro, project in enumerate(projects):
-    factsList.append({"collectionProjectId": project['project_id']})
+    factsList.append({ "fact": "collectionProjectId", "name": project['project_id'] })
   return factsList
 
 
 def appendTraditionalProjects(factsList, projects):
   for nro, project in enumerate(projects):
-    factsList.append({"traditionalProjectId": project['project']['id']})
+    factsList.append({ "fact": "traditionalProjectId", "value": project['project']['id'] })
   return factsList
 
 
@@ -228,8 +218,8 @@ def convertObservations(inatObservations):
     gathering['gatheringId'] = documentId + "-G"
     unit['unitId'] = documentId + "-U"
 
-    documentFacts.append({"catalogueNumber": inat['id']})
-    documentFacts.append({"referenceURI": inat['uri']})
+    documentFacts.append({ "fact": "catalogueNumber", "value": inat['id']})
+    documentFacts.append({ "fact": "referenceURI", "value": inat['uri']})
     keywords.append(str(inat['id'])) # id has to be string
 
 
@@ -238,10 +228,10 @@ def convertObservations(inatObservations):
     unit['taxonVerbatim'] = inatHelpers.convertTaxon(inat['taxon']['name'])
 
     # Name observer or identifiers(?) have given, can be any language
-    unitFacts.append({"species_guess": inat['species_guess']})
+    unitFacts.append({ "fact": "species_guess", "value": inat['species_guess']})
 
     # Scientific name iNat interprets this to be
-    unitFacts.append({"taxonInterpretationByiNaturalist": inat['taxon']['name']})
+    unitFacts.append({ "fact": "taxonInterpretationByiNaturalist", "value": inat['taxon']['name']})
 
 
     # Observer
@@ -265,7 +255,7 @@ def convertObservations(inatObservations):
 
     # Orcid
     if inat['user']['orcid']:
-      documentFacts.append({"observerOrcid": inat['user']['orcid']}) 
+      documentFacts.append({ "fact": "observerOrcid", "value": inat['user']['orcid']}) 
 
 
     # Description
@@ -298,7 +288,7 @@ def convertObservations(inatObservations):
     gathering['eventDate']['begin'] = inat['observed_on_details']['date'] # TODO: test if date is missing
     gathering['eventDate']['end'] = gathering['eventDate']['begin'] # End alsways same as beginning
 
-    documentFacts.append({"observedOrCreatedAt": inat['time_observed_at']}) # This is the exact datetime when observation was saved
+    documentFacts.append({ "fact": "observedOrCreatedAt", "value": inat['time_observed_at']}) # This is the exact datetime when observation was saved
 
 
     # Locality
@@ -317,7 +307,7 @@ def convertObservations(inatObservations):
     if photoCount >= 1:
       unit['media'] = []
       keywords.append("has_photos") # Needed for combined photo & image search
-      unitFacts.append({"imageCount": photoCount})
+      unitFacts.append({ "fact": "imageCount", "value": photoCount})
       arrImagesIncluded = False
 
       if photoCount > 4:
@@ -326,8 +316,8 @@ def convertObservations(inatObservations):
       for nro, photo in enumerate(inat['observation_photos']):
         # Facts
         photoId = str(photo['photo']['id'])
-        unitFacts.append({"imageId": photoId})
-        unitFacts.append({"imageUrl": "https://www.inaturalist.org/photos/" + photoId})
+        unitFacts.append({ "fact": "imageId", "value": photoId})
+        unitFacts.append({ "fact": "imageUrl", "value": "https://www.inaturalist.org/photos/" + photoId})
 
         # Photo
         if photo['photo']['license_code']:
@@ -344,14 +334,14 @@ def convertObservations(inatObservations):
     # Note: if audio is later linked via proxy, need to check that cc-license is given 
     if soundCount >= 1:
       keywords.append("has_sounds") # Needed for combined photo & image search
-      unitFacts.append({"soundCount": soundCount})
+      unitFacts.append({ "fact": "soundCount", "value": soundCount})
 
       if soundCount > 1:
         keywords.append("over_1_sounds")
 
       for nro, sound in enumerate(inat['sounds']):
-        unitFacts.append({"audioId": sound['id']})
-        unitFacts.append({"audioUrl": sound['file_url']})
+        unitFacts.append({ "fact": "audioId", "value": sound['id']})
+        unitFacts.append({ "fact": "audioUrl", "value": sound['file_url']})
 
 
     # Any media
@@ -362,7 +352,7 @@ def convertObservations(inatObservations):
     # Observation fields
     hasSpecimen = False
     for nro, val in enumerate(inat['ofvs']):
-      unitFacts.append({val['name_ci']: val['value_ci']}) # This preserves zero values, which can be important in observation fields
+      unitFacts.append({ "fact": val['name_ci'], "value": val['value_ci']}) # This preserves zero values, which can be important in observation fields
       if "Specimen" == val['name_ci']:
         hasSpecimen = True
 
@@ -396,7 +386,7 @@ def convertObservations(inatObservations):
         # Annotation voted for, added as unit fact
         else:
           factName = "annotation_" + str(key)
-          unitFacts.append({factName: str(value)})
+          unitFacts.append({ "fact": factName, "value": str(value)})
 
         # Annotations with native values in DW:
         # TODO: test
@@ -415,7 +405,7 @@ def convertObservations(inatObservations):
       for metric, value in qualityMetricsSummary.items():
         # Add to facts
         metricName = "quality_metrics_" + metric
-        unitFacts.append({metricName: str(value)})
+        unitFacts.append({ "fact": metricName, "value": str(value)})
 
         # If at least one negative quality metric, mark as unreliable. Exception: non-wilds are handled elsewhere.
         if "wild" != metric:
@@ -456,7 +446,7 @@ def convertObservations(inatObservations):
 
 
     # Quality grade
-    unitFacts.append({"quality_grade": inat['quality_grade'] + "_grade"})
+    unitFacts.append({ "fact": "quality_grade", "value": inat['quality_grade'] + "_grade"})
     keywords.append(inat['quality_grade'] + "_grade")
 
 
@@ -466,18 +456,18 @@ def convertObservations(inatObservations):
 
 
     # Misc facts
-    unitFacts = appendFact(unitFacts, inat, "out_of_range")
-    unitFacts = appendFact(unitFacts, inat, "taxon_geoprivacy")
-    unitFacts = appendFact(unitFacts, inat, "geoprivacy")
-#    unitFacts = appendFact(unitFacts, inat, "context_geoprivacy") # not used anymore?
-#    unitFacts = appendFact(unitFacts, inat, "context_user_geoprivacy") # not used anymore?
-#    unitFacts = appendFact(unitFacts, inat, "context_taxon_geoprivacy") # not used anymore?
-    unitFacts = appendFact(unitFacts, inat, "comments_count")
-    unitFacts = appendFact(unitFacts, inat, "num_identification_agreements")
-    unitFacts = appendFact(unitFacts, inat, "num_identification_disagreements")
-    unitFacts = appendFact(unitFacts, inat, "owners_identification_from_vision")
-    unitFacts = appendFact(unitFacts, inat, "oauth_application_id")
-    unitFacts = appendFact(unitFacts, inat, "identifications_count")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "out_of_range")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "taxon_geoprivacy")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "geoprivacy")
+#    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "context_geoprivacy") # not used anymore?
+#    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "context_user_geoprivacy") # not used anymore?
+#    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "context_taxon_geoprivacy") # not used anymore?
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "comments_count")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "num_identification_agreements")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "num_identification_disagreements")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "owners_identification_from_vision")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "oauth_application_id")
+    unitFacts = inatHelpers.appendRootFact(unitFacts, inat, "identifications_count")
 
 
     # Misc keywords
