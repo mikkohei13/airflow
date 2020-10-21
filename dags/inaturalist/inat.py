@@ -30,24 +30,23 @@ thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
 # Get latest update data from Airflow variables
 if "staging" == target:
-  airflowVariable_inat_latest_obs_id = Variable.get("inat_staging_latest_obs_id")
+  af_latest_obsId = Variable.get("inat_staging_latest_obsId")
+  af_latest_update = Variable.get("inat_staging_latest_update")
 elif "production" == target:
-  airflowVariable_inat_latest_update = Variable.get("inat_production_latest_update")
+  af_latest_obsId = Variable.get("inat_production_latest_obsId")
+  af_latest_update = Variable.get("inat_production_latest_update")
 
-#airflowVariable_inat_latest_obs_id = 60063865 # debug
+#af_latest_obsId = 60063865 # debug
 
 
 # GET
 
-i = 0 # debug
-
-# TODO: refactor name to "latestObsId"
-lastUpdateKey = 0 # Just in case, should be returned with conversion function. TODO: remove this loc
+page = 1
+pageLimit = 5
 
 # For each pageful of data
-for multiObservationDict in getInat.getUpdatedGenerator(airflowVariable_inat_latest_obs_id, airflowVariable_inat_latest_update):
-  print("")
-  print("i: " + str(i)) # debug
+for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_latest_update):
+  print("Page: " + str(page)) # debug
 #  print(multiObservationDict)
 
   # If no observations on page, don't convert & post
@@ -55,32 +54,38 @@ for multiObservationDict in getInat.getUpdatedGenerator(airflowVariable_inat_lat
     break;
 
   # CONVERT
-  dwObservation, lastUpdateKey = inatToDw.convertObservations(multiObservationDict['results'])
+  dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'])
 
-  print(dwObservations)
+#  print(dwObservations)
+#  exit()
 
 
   # POST
   # TODO: set production vs staging
-  postSuccess = postDw.postMultiMock(dwObservations, target)
+  postSuccess = postDw.postMulti(dwObservations, target)
 
-  # If this pageful contained data, and was saved successfully to DW, set lastUpdateKey as variable
+  # If this pageful contained data, and was saved successfully to DW, set latestObsId as variable
   if postSuccess:
     if "staging" == target:
-      Variable.set("inat_staging_latest_obs_id", lastUpdateKey)
-      Variable.set("inat_staging_latest_update", thisUpdateTime)
+      Variable.set("inat_staging_latest_obsId", latestObsId)
+#      Variable.set("inat_staging_latest_update", thisUpdateTime)
     elif "production" == target:
-      Variable.set("inat_production_latest_obs_id", lastUpdateKey)
-      Variable.set("inat_staging_latest_update", thisUpdateTime)
-      
+      Variable.set("inat_production_latest_obsId", latestObsId)
+#      Variable.set("inat_production_latest_update", thisUpdateTime)
+
+  if page < pageLimit:
+    page = page + 1
+  else:
+    print("Page limit " + str(pageLimit) + " reached")
+    break
+
 
 
 # If whole process was successful
-#Variable.set("inat_latest_update", thisUpdateTime) # UNCOMMENT THIS TO USE VARS
-
-
-# TODO: This will be used for debugging -> not needed in DAG, only on CLI
-#singleObservationDict = inat.getSingle(airflowVariable_inat_latest_obs_id)
+if "staging" == target:
+  Variable.set("inat_staging_latest_update", thisUpdateTime)
+elif "production" == target:
+  Variable.set("inat_production_latest_update", thisUpdateTime)
 
 
 # -----------------------------------------------------------

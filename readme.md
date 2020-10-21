@@ -40,6 +40,8 @@ Get updated observations and post to DW:
 
 # Todo
 
+- Update latestObsId on getInat.py
+- OrderdedDict?
 - Conversion tweaks:
   - TEST: lisämuuttujat on doc, gath, unit level
   - ASK: Remove spaces, special chars etc. from fact names, esp. when handling observation fields

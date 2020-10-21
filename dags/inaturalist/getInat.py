@@ -32,18 +32,20 @@ def getPageFromAPI(url):
     errorCode = str(inatResponse.status_code)
     raise Exception(f"iNaturalist API responded with error {errorCode}")
 
-  # TODO: create ordered dict
+  # TODO: create ordered dict. ALREADY DONE?
   inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
+#  print(inatResponse.text)
+#  exit()
 
   return inatResponseDict
 
 
-def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
+def getUpdatedGenerator(latestObsId, latestUpdateTime):
   """Generator that gets and yields new and updated iNat observations, by handling pagination and calling getPageFromAPI().
 
   Args:
-    lastUpdateKey (int): Highest observation id that should not be fetched.
-    lastUpdateTime (string): Time after which updated observations should be fecthed.
+    latestObsId (int): Highest observation id that should not be fetched.
+    latestUpdateTime (string): Time after which updated observations should be fecthed.
 
   Raises:
     Exception: If getPageFromAPI() fails to fetch data.
@@ -57,7 +59,7 @@ def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
 
   # TODO: move as args
   perPage = 3 # Production value: 100
-  maxPages = 3 # Production value: 1000
+  maxPages = 1000 # Production value: 1000 TODO: Remove this, max pages number is controlled in inat.py
   sleepSeconds = 3
 
   page = 0
@@ -65,35 +67,40 @@ def getUpdatedGenerator(lastUpdateKey, lastUpdateTime):
   # TODO: stop after all is fecthed
 
   while page < maxPages:
-    print("Getting page " + str(page) + " below " + str(maxPages) + " lastUpdateKey " + str(lastUpdateKey) + " lastUpdateTime " + lastUpdateTime)
+    print("Getting page " + str(page) + " below " + str(maxPages) + " latestObsId " + str(latestObsId) + " latestUpdateTime " + latestUpdateTime)
 
     # TODO: Option to get only nonwilds
 
-    url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "&include_new_projects=true"
+    url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "&include_new_projects=true"
 
+    # TODO: Remove this debugging part
     # Debugging case where API does not respond correctly after n:th page
-    debug = True
-    if debug:
-      if page > 0:
+#    debug = True
+#    if debug:
+#      if page > 0:
         # User broken URI
-        url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + lastUpdateTime + "&id_above=" + str(lastUpdateKey) + "00&include_new_projects=true"
+#        url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "00&include_new_projects=true"
     # Debug end
 
-    print("Getting URL " + url)
+#    print("Getting URL " + url)
     inatResponseDict = getPageFromAPI(url)
 
-    print("Got " + str(inatResponseDict["total_results"]) + " observations.")
+    print("Search matched " + str(inatResponseDict["total_results"]) + " observations.")
 
     # If no observations on page, just return False
     if 0 == inatResponseDict["total_results"]:
       print("No more observations.")
       return False
+    
+    else:
+      latestObsId = inatResponseDict["results"][-1]["id"]
 
-    page = page + 1
-    time.sleep(sleepSeconds) # TODO: Can this be after yield?
+      page = page + 1
+  
+      time.sleep(sleepSeconds) # TODO: Can this be after yield?
 
-    # return whole dict
-    yield inatResponseDict
+      # return whole dict
+      yield inatResponseDict
 
 
 
