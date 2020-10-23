@@ -25,13 +25,13 @@ def postSingle(dwObs, target):
   targetResponse = requests.post(url = targetUrl, json = dwObs) 
 
   if 200 == targetResponse.status_code:
-    print("API responded " + str(targetResponse.status_code))
+    print("DW API responded " + str(targetResponse.status_code))
     return True
 
   else:
     errorCode = str(targetResponse.status_code)
     print(targetResponse.text)
-    raise Exception(f"API responded with error {errorCode}")
+    raise Exception(f"DW API responded with error {errorCode}")
 
 
 def postMulti(dwObs, target):

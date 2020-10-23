@@ -43,9 +43,8 @@ elif "production" == target:
 
 page = 1
 
-
 props = {"sleepSeconds": 5, "perPage": 100, "pageLimit": 1000 } # Prod
-props = {"sleepSeconds": 2, "perPage": 100, "pageLimit": 3 } # Debug
+props = {"sleepSeconds": 2, "perPage": 100, "pageLimit": 10 } # Debug
 
 
 # For each pageful of data

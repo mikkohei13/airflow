@@ -38,10 +38,10 @@ def skipObservation(inat):
   # Note: This is only for skipping observations that don't YET have enough infor to be worthwhile to be included to DW. Don't skip e.g. spam here, because then spammy observations would stay in DW forever. Instead mark them as having issues.
 
   if not inat["taxon"]:
-    print("Skipping observation " + str(inat["id"]) + " without taxon.")
+    print("skipping " + str(inat["id"]) + " without taxon.")
     return True
   elif not inat["observed_on_details"]:
-    print("Skipping observation " + str(inat["id"]) + " without date.")
+    print("skipping " + str(inat["id"]) + " without date.")
     return True
   else:
     return False
@@ -80,6 +80,8 @@ def summarizeQualityMetrics(quality_metrics):
 
   for nro, vote in enumerate(quality_metrics):
     # Skip vote if spam or suspended user, NOT TESTED
+    if "user" not in vote: # If user has been deleted?
+      continue
     if vote["user"]["spam"]:
       continue
     if vote["user"]["suspended"]:
@@ -163,6 +165,8 @@ def convertObservations(inatObservations):
 
   # For each observation
   for nro, inat in enumerate(inatObservations):
+    print("Converting obs " + str(inat["id"]), end = " ... ")
+
     
     # Debug
 #    jsonData = json.dumps(inat)
@@ -523,7 +527,7 @@ def convertObservations(inatObservations):
     # Store last converted observation
     lastUpdateKey = inat["id"]
 
-    print("Converted obs " + str(inat["id"]))
+    print("converted " + str(inat["id"]))
 
 
   # End for each observations

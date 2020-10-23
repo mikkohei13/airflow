@@ -54,7 +54,7 @@ def getCoordinates(inat):
       coord['latMin'] = decimalFloor((latRaw - 0.1))
       coord['latMax'] = decimalFloor((latRaw + 0.1))
 
-    coord['accuracyInMeters'] = "" # This changed compared to PHP version
+#    coord['accuracyInMeters'] = "" # Accuracy not set for obscured obs, since DW calculates it by itself from bounding box
 
   # Non-obscured observation
   else:

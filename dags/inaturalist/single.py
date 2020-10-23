@@ -19,6 +19,7 @@ mittari 60201865 - karkeistettu
 sieni lehdellä 60934016 - yksityinen
 sammal 62132113 - ei koordinaattien tarkkuutta
 tolppa 55900883 - quality metrics
+kissa 60213784 - quality metrics given by user who no longer exist (probably?)
 
 Flagged observations to test with:
 https://www.inaturalist.org/flags?commit=Suodata&flaggable_type=Observation&flagger_name=&flagger_type=any&flagger_user_id=&flags%5B%5D=other&page=3&reason_query=&resolved=no&resolver_name=&resolver_user_id=&user_id=&user_name=&utf8=%E2%9C%93
