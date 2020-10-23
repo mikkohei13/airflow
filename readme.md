@@ -40,6 +40,8 @@ Get updated observations and post to DW:
 
 # Todo
 
+iNat
+- Why dev.laji.fi does not seem to show all observations?
 - Update latestObsId on getInat.py
 - OrderdedDict?
 - Conversion tweaks:

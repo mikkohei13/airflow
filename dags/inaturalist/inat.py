@@ -42,23 +42,26 @@ elif "production" == target:
 # GET
 
 page = 1
-pageLimit = 5
+
+
+props = {"sleepSeconds": 5, "perPage": 100, "pageLimit": 1000 } # Prod
+props = {"sleepSeconds": 2, "perPage": 100, "pageLimit": 3 } # Debug
+
 
 # For each pageful of data
-for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_latest_update):
+for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_latest_update, **props):
   print("Page: " + str(page)) # debug
 #  print(multiObservationDict)
 
-  # If no observations on page, don't convert & post
+  # If no more observations on page, finish the process
   if False == multiObservationDict:
-    break;
+    if "staging" == target:
+      Variable.set("inat_staging_latest_update", thisUpdateTime)
+    elif "production" == target:
+      Variable.set("inat_production_latest_update", thisUpdateTime)
 
   # CONVERT
   dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'])
-
-#  print(dwObservations)
-#  exit()
-
 
   # POST
   # TODO: set production vs staging
@@ -68,24 +71,15 @@ for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_late
   if postSuccess:
     if "staging" == target:
       Variable.set("inat_staging_latest_obsId", latestObsId)
-#      Variable.set("inat_staging_latest_update", thisUpdateTime)
     elif "production" == target:
       Variable.set("inat_production_latest_obsId", latestObsId)
-#      Variable.set("inat_production_latest_update", thisUpdateTime)
 
-  if page < pageLimit:
+  if page < props["pageLimit"]:
     page = page + 1
   else:
-    print("Page limit " + str(pageLimit) + " reached")
-    break
+    # Exception because this should not happen in production (happens only if pageLimit is too low compared to frequency of this script being run)
+    raise Exception("Page limit " + str(props["pageLimit"]) + " reached.")
 
-
-
-# If whole process was successful
-if "staging" == target:
-  Variable.set("inat_staging_latest_update", thisUpdateTime)
-elif "production" == target:
-  Variable.set("inat_production_latest_update", thisUpdateTime)
 
 
 # -----------------------------------------------------------

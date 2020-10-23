@@ -40,7 +40,7 @@ def getPageFromAPI(url):
   return inatResponseDict
 
 
-def getUpdatedGenerator(latestObsId, latestUpdateTime):
+def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleepSeconds):
   """Generator that gets and yields new and updated iNat observations, by handling pagination and calling getPageFromAPI().
 
   Args:
@@ -57,17 +57,12 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime):
 
   # TODO: Check if time(zone) is correct in Docker.
 
-  # TODO: move as args
-  perPage = 3 # Production value: 100
-  maxPages = 1000 # Production value: 1000 TODO: Remove this, max pages number is controlled in inat.py
-  sleepSeconds = 3
+  # TODO: stop after all is fecthed
 
   page = 0
 
-  # TODO: stop after all is fecthed
-
-  while page < maxPages:
-    print("Getting page " + str(page) + " below " + str(maxPages) + " latestObsId " + str(latestObsId) + " latestUpdateTime " + latestUpdateTime)
+  while True:
+    print("Getting page " + str(page) + " below " + str(pageLimit) + " latestObsId " + str(latestObsId) + " latestUpdateTime " + latestUpdateTime)
 
     # TODO: Option to get only nonwilds
 
@@ -85,10 +80,11 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime):
 #    print("Getting URL " + url)
     inatResponseDict = getPageFromAPI(url)
 
-    print("Search matched " + str(inatResponseDict["total_results"]) + " observations.")
+    resultObservationCount = inatResponseDict["total_results"]
+    print("Search matched " + str(resultObservationCount) + " observations.")
 
     # If no observations on page, just return False
-    if 0 == inatResponseDict["total_results"]:
+    if 0 == resultObservationCount:
       print("No more observations.")
       return False
     

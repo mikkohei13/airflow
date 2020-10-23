@@ -46,7 +46,7 @@ services:
             - ./logs:/opt/airflow/logs
             - ./scripts:/opt/airflow/scripts
         ports:
-            - "8080:8080"
+            - "8082:8080"
 
 volumes: 
     postgres-volume:
