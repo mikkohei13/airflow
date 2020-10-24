@@ -86,7 +86,8 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
     # If no observations on page, just return False
     if 0 == resultObservationCount:
       print("No more observations.")
-      return False
+      yield False
+      break
     
     else:
       latestObsId = inatResponseDict["results"][-1]["id"]

@@ -27,6 +27,8 @@ target = "staging" # production | staging
 # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
 now = datetime.datetime.now()
 thisUpdateTime = now.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+thisUpdateTime = thisUpdateTime.replace(":", "%3A")
+thisUpdateTime = thisUpdateTime.replace("+", "%2B")
 
 # Get latest update data from Airflow variables
 if "staging" == target:
@@ -43,8 +45,8 @@ elif "production" == target:
 
 page = 1
 
-props = {"sleepSeconds": 5, "perPage": 100, "pageLimit": 1000 } # Prod
-props = {"sleepSeconds": 2, "perPage": 100, "pageLimit": 10 } # Debug
+props = { "sleepSeconds": 5, "perPage": 100, "pageLimit": 1000 } # Prod
+props = { "sleepSeconds": 2, "perPage": 100, "pageLimit": 10 } # Debug
 
 
 # For each pageful of data
@@ -52,12 +54,16 @@ for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_late
   print("Page: " + str(page)) # debug
 #  print(multiObservationDict)
 
-  # If no more observations on page, finish the process
+  # If no more observations on page, finish the process by saving update time and resetting observation id to zero.
   if False == multiObservationDict:
+    print("Finishing, setting latest update to " + thisUpdateTime)
     if "staging" == target:
       Variable.set("inat_staging_latest_update", thisUpdateTime)
+      Variable.set("inat_staging_latest_obsId", 0)
     elif "production" == target:
       Variable.set("inat_production_latest_update", thisUpdateTime)
+      Variable.set("inat_production_latest_obsId", 0)
+    break
 
   # CONVERT
   dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'])
