@@ -6,14 +6,14 @@ import json # for debug
 import inatHelpers
 
 """
-BUGFIXES COMPARED TO PHP VERSION 9/2020:
+BUGFIXES COMPARED TO PHP-VERSION 9/2020:
 - If quality was less than -1, not marked as unreliable. Must reprocess all.
 - If obs had multiple ARR images, multiple image_arr keywords were set.
 - Obscured obs coordinate box was calculated incorrectly
 - Obscured obs accuracy was set to 0
 - Annotations were saved incorrectly, so that also negative and tied votes resulted in positive annotation and fact.
 
-NOTES/CHANGES COMPARED TO PHP VERSION 9/2020:
+NOTES/CHANGES COMPARED TO PHP-VERSION 9/2020:
 - Script expects that all observations are from Finland, so it fills in hardcoded country name. Must change this if also foreign observations ar handled.
 - DW removes/hides humans, so handling them here is not needed. (Used to make them private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flagged media files? E.g. https://www.inaturalist.org/observations/46356508
@@ -21,15 +21,14 @@ NOTES/CHANGES COMPARED TO PHP VERSION 9/2020:
 - Possibly TODO: Filter out unwanter users (e.g. test users: testaaja, outo)
 - Previously used copyright string, now just user name for photo attribution, since license in separate field.
 - Unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field is unclear.
-- observerActivityCount should not be used, since it increases over time -> is affected by *when* the observation was fetched from iNat.
-- Note that at least annotations and quality metrics appear on the api after a delay (c. 15 mins cache?)
+- observerActivityCount is not used, since it increases over time -> is affected by *when* the observation was fetched from iNat.
+- Note that at least annotations and quality metrics appear on the iNat API after a delay (c. 15 mins cache?)
 
 DW data features:
 - There can be multiple facts with the same name
-- Facts are strings
+- Facts are strings(?)
 - Fields can be left blank
 - Enum values are ALL-CAPS
-- Can there be multiple similar keywords?
 
 """
 
@@ -57,16 +56,18 @@ def appendKeyword(keywordList, inat, keywordName):
   return keywordList
 
 
-def appendCollectionProjects(factsList, projects):
+def appendCollectionProjects(factsList, keywords, projects):
   for nro, project in enumerate(projects):
+    keywords.append("project-" + str(project['project_id']))
     factsList.append({ "fact": "collectionProjectId", "name": project['project_id'] })
-  return factsList
+  return factsList, keywords
 
 
-def appendTraditionalProjects(factsList, projects):
+def appendTraditionalProjects(factsList, keywords, projects):
   for nro, project in enumerate(projects):
+    keywords.append("project-" + str(project['project']['id']))
     factsList.append({ "fact": "traditionalProjectId", "value": project['project']['id'] })
-  return factsList
+  return factsList, keywords
 
 
 def appendTags(keywordsList, tags):
@@ -275,11 +276,11 @@ def convertObservations(inatObservations):
     # Projects
     # Non-traditional / Collection (automatic)
     if "non_traditional_projects" in inat:
-      documentFacts = appendCollectionProjects(documentFacts, inat['non_traditional_projects'])
+      documentFacts, keywords = appendCollectionProjects(documentFacts, keywords, inat['non_traditional_projects'])
     
     # Traditional (manual)
     if "project_observations" in inat:
-      documentFacts = appendTraditionalProjects(documentFacts, inat['project_observations'])
+      documentFacts, keywords = appendTraditionalProjects(documentFacts, keywords, inat['project_observations'])
 
 
     # Dates
@@ -310,7 +311,7 @@ def convertObservations(inatObservations):
     photoCount = len(inat['observation_photos'])
     if photoCount >= 1:
       unit['media'] = []
-      keywords.append("has_photos") # Needed for combined photo & image search
+      keywords.append("has_images") # Needed for combined photo & image search
       unitFacts.append({ "fact": "imageCount", "value": photoCount})
       arrImagesIncluded = False
 

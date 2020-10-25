@@ -41,6 +41,9 @@ Get updated observations and post to DW:
 # Todo
 
 iNat
+- CONVERSIONS:
+  - project keywords
+  - project facts (collectionProjectId) e.g. 63388504
 - Why dev.laji.fi does not seem to show all observations?
 - Update latestObsId on getInat.py
 - OrderdedDict?
