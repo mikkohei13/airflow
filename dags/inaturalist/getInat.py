@@ -57,8 +57,6 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
 
   # TODO: Check if time(zone) is correct in Docker.
 
-  # TODO: stop after all is fecthed
-
   page = 0
 
   while True:

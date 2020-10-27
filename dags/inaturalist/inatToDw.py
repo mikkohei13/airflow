@@ -133,7 +133,7 @@ def getImageData(photo, observer):
   thumbnailUrl = thumbnailUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor into helper
 
   fullUrl = squareUrl.replace("square", "original")
-  fullUrl = fullUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor
+  fullUrl = fullUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor into helper
 
   photoDict = {}
   photoDict['thumbnailURL'] = thumbnailUrl
@@ -146,7 +146,7 @@ def getImageData(photo, observer):
 
 
 def convertObservations(inatObservations):
-  """Convert a single observation from iNat to FinBIF DW format.
+  """Convert observations from iNat to FinBIF DW format.
 
   Args:
   inat (orderedDictionary): single observation in iNat format.
@@ -291,8 +291,8 @@ def convertObservations(inatObservations):
     publicDocument['modifiedDate'] = updatedDatePieces[0]
 
     gathering['eventDate'] = {}
-    gathering['eventDate']['begin'] = inat['observed_on_details']['date'] # TODO: test if date is missing
-    gathering['eventDate']['end'] = gathering['eventDate']['begin'] # End alsways same as beginning
+    gathering['eventDate']['begin'] = inat['observed_on_details']['date']
+    gathering['eventDate']['end'] = gathering['eventDate']['begin'] # End always same as beginning
 
     documentFacts.append({ "fact": "observedOrCreatedAt", "value": inat['time_observed_at']}) # This is the exact datetime when observation was saved
 
@@ -502,7 +502,6 @@ def convertObservations(inatObservations):
 
 
     # Coordinates
-    # TODO: test with obs without coord
     if inat['mappable']:
       gathering['coordinates'] = inatHelpers.getCoordinates(inat)
 

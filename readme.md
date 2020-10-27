@@ -43,16 +43,12 @@ Get updated observations and post to DW:
 iNat
 - Monitor if iNat API changes (test observation)
 - CONVERSIONS:
+  - test if date begin is missing
+  - select production/dev coll ... how?
   - annotation key 17 (inatHelpers)
-- Why dev.laji.fi does not seem to show all observations?
-- Update latestObsId on getInat.py
-- OrderdedDict?
-- Conversion tweaks:
-  - TEST: lisämuuttujat on doc, gath, unit level
   - ASK: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
-- Test conversions
-  - Are any falses or Nones present in the json? ASK: How would DW handle them?
   - See TODO's from conversion script
+- ASK: Why dev.laji.fi does not seem to update all observations? (Slack with Esko)
 - Setup delete command
 - Setup (unit) testing
 - Docker-compose with image version numbers?
