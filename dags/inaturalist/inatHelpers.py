@@ -98,7 +98,7 @@ def convertTaxon(taxon):
   convert['Canis familiaris'] = "Canis lupus familiaris" # koira
 
   if not taxon: # Empty, False, Null/None
-    return "Biota"  
+    return ""  
   elif taxon in convert:
     return convert[taxon]
   else:
@@ -124,7 +124,7 @@ def summarizeAnnotation(annotation):
   Life Stage: 2=Adult, 3=Teneral, 4=Pupa, 5=Nymph, 6=Larva, 7=Egg, 8=Juvenile, 16=Subimago
   Sex: 10=Female, 11=Male
   Plant Phenology: 13=Flowering, 14=Fruiting, 15=Budding
-  Live or dead: 18=Live, ?=Dead
+  Live or dead: 18=Live, 19=Dead, 20=Cannot be identified
 
   See in main conversion script how the result is submitted to DW.
 
@@ -134,6 +134,8 @@ def summarizeAnnotation(annotation):
   key = annotation["controlled_attribute_id"]
   value = annotation["controlled_value_id"]
   vote_score = annotation["vote_score"]
+
+  print(str(key) + ":::" + str(value))
 
   if 2 == value:
     key = "lifeStage"

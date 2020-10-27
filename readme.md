@@ -41,9 +41,9 @@ Get updated observations and post to DW:
 # Todo
 
 iNat
+- Monitor if iNat API changes (test observation)
 - CONVERSIONS:
-  - project keywords
-  - project facts (collectionProjectId) e.g. 63388504
+  - annotation key 17 (inatHelpers)
 - Why dev.laji.fi does not seem to show all observations?
 - Update latestObsId on getInat.py
 - OrderdedDict?

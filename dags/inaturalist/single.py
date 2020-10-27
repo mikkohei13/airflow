@@ -14,9 +14,9 @@ puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html, annotations
 (joku)hopeatäplä 53608382 - coll and trad projects, annotations (also negative)
 ohdakeperhonen 39330050 - locality names
 parmaj 61948403 - kaupunkilinnut, 9 photos
-cerfam 61079103 - kaupunkilinnt, 2 photos 1 sound
-mittari 60201865 - karkeistettu
-sieni lehdellä 60934016 - yksityinen
+pasdom 48148712 - kaupunkilinnut, 3 photos and 1 sound
+mittari 60201865 - karkeistettu -> box coordinates
+sieni lehdellä 60934016 - yksityinen -> ei koordinaatteja
 sammal 62132113 - ei koordinaattien tarkkuutta
 tolppa 55900883 - quality metrics
 kissa 60213784 - quality metrics given by user who no longer exist (probably?)
@@ -37,7 +37,7 @@ singleObservationDict = getInat.getSingle(id)
 
 dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'])
 
-print("TEMP DEBUG lastUpdateKey: " + str(lastUpdateKey))
+#print("TEMP DEBUG lastUpdateKey: " + str(lastUpdateKey))
 
 
 # Output

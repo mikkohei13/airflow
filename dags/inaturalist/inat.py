@@ -15,14 +15,12 @@ def printObject(object):
   print(object.__dict__)
 
 
-
 ### SETUP
+
+target = sys.argv[1] # staging | production
 
 print("Start") 
 
-
-#TODO: Args for production vs staging
-target = "staging" # production | staging
 
 # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
 now = datetime.datetime.now()

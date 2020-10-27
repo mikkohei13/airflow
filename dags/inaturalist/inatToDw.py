@@ -12,6 +12,7 @@ BUGFIXES COMPARED TO PHP-VERSION 9/2020:
 - Obscured obs coordinate box was calculated incorrectly
 - Obscured obs accuracy was set to 0
 - Annotations were saved incorrectly, so that also negative and tied votes resulted in positive annotation and fact.
+- If observation was private, it was skipped ("Skipped observation not from Finland"), because private observation have no place_id's. 
 
 NOTES/CHANGES COMPARED TO PHP-VERSION 9/2020:
 - Script expects that all observations are from Finland, so it fills in hardcoded country name. Must change this if also foreign observations ar handled.
@@ -20,13 +21,13 @@ NOTES/CHANGES COMPARED TO PHP-VERSION 9/2020:
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
 - Possibly TODO: Filter out unwanter users (e.g. test users: testaaja, outo)
 - Previously used copyright string, now just user name for photo attribution, since license in separate field.
-- Unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field is unclear.
+- Unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field in iNat is unclear.
 - observerActivityCount is not used, since it increases over time -> is affected by *when* the observation was fetched from iNat.
 - Note that at least annotations and quality metrics appear on the iNat API after a delay (c. 15 mins cache?)
 
 DW data features:
 - There can be multiple facts with the same name
-- Facts are strings(?)
+- Keywords have to be strings (int will cause a failure)
 - Fields can be left blank
 - Enum values are ALL-CAPS
 
@@ -81,12 +82,12 @@ def summarizeQualityMetrics(quality_metrics):
 
   for nro, vote in enumerate(quality_metrics):
     # Skip vote if spam or suspended user, NOT TESTED
-    if "user" not in vote: # If user has been deleted?
-      continue
-    if vote["user"]["spam"]:
-      continue
-    if vote["user"]["suspended"]:
-      continue 
+    if "user" in vote: # If user has been deleted, user is not set. Still handle the user's vote normally.
+      # Skip spam and suspended user votes
+      if vote["user"]["spam"]:
+        continue
+      if vote["user"]["suspended"]:
+        continue 
 
     # Calculate vote
     if True == vote["agree"]:
@@ -338,7 +339,7 @@ def convertObservations(inatObservations):
     soundCount = len(inat['sounds'])
     # Note: if audio is later linked via proxy, need to check that cc-license is given 
     if soundCount >= 1:
-      keywords.append("has_sounds") # Needed for combined photo & image search
+      keywords.append("has_audio") # Needed for combined photo & image search
       unitFacts.append({ "fact": "soundCount", "value": soundCount})
 
       if soundCount > 1:
@@ -385,16 +386,16 @@ def convertObservations(inatObservations):
       for nro, annotation in enumerate(inat['annotations']):
         key, value = inatHelpers.summarizeAnnotation(annotation)
 
-        # Annotations voted against or tie, saved only as keyword
+        # Annotations voted against or tie, only keyword is saved
         if "keyword" == key:
           keywords.append(value)
         # Annotation voted for, added as unit fact
         else:
+          # NOTE: If annotation is saved as keyword, make sure it's a string, not int.
           factName = "annotation_" + str(key)
           unitFacts.append({ "fact": factName, "value": str(value)})
 
         # Annotations with native values in DW:
-        # TODO: test
         if "lifeStage" == key:
           unit['lifeStage'] = value
         elif "sex" == key:
@@ -406,6 +407,7 @@ def convertObservations(inatObservations):
     qualityMetricUnreliable = False
     if "quality_metrics" in inat:
       qualityMetricsSummary = summarizeQualityMetrics(inat["quality_metrics"])
+#      exit(qualityMetricsSummary) # debug ABBA
 
       for metric, value in qualityMetricsSummary.items():
         # Add to facts
