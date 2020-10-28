@@ -129,11 +129,8 @@ def getLicenseUrl(licenseCode):
 def getImageData(photo, observer):
   squareUrl = photo['photo']['url']
 
-  thumbnailUrl = squareUrl.replace("square", "small")
-  thumbnailUrl = thumbnailUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor into helper
-
-  fullUrl = squareUrl.replace("square", "original")
-  fullUrl = fullUrl.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/") # TODO: refactor into helper
+  thumbnailUrl = inatHelpers.getProxyUrl(squareUrl, "small")
+  fullUrl = inatHelpers.getProxyUrl(squareUrl, "original")
 
   photoDict = {}
   photoDict['thumbnailURL'] = thumbnailUrl

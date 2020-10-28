@@ -180,6 +180,11 @@ def summarizeAnnotation(annotation):
 #    print("Annotation " + str(key) + " = " + str(value) + " vote tied")
     return "keyword", "annotation_tie"
 
+def getProxyUrl(squareUrl, imageSize):
+  url = squareUrl.replace("square", imageSize)
+  url = url.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/")
+
+  return url
 
 
 

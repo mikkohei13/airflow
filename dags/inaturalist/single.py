@@ -11,7 +11,7 @@ import json
 """
 Test observations
 puolukkapiiloyökkönen 60063865 (TEST CASE) - tags, obs fields, desc with html, annotations
-pasdom 48148712 (TEST CASE) - kaupunkilinnut, 3 photos and 1 sound, annotations, traditional projects, tag, observation fields
+pasdom 48148712 (TEST CASE) - kaupunkilinnut, 3 photos and 1 sound, annotations, traditional projects, tag, observation fields, copyrighted media
 
 (joku)hopeatäplä 53608382 - coll and trad projects, annotations (also negative)
 ohdakeperhonen 39330050 - locality names
