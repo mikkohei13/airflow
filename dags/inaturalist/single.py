@@ -10,11 +10,12 @@ import json
 
 """
 Test observations
-puolukkapiiloyökkönen 60063865 - tags, obs fields, desc with html, annotations (also negative)
+puolukkapiiloyökkönen 60063865 (TEST CASE) - tags, obs fields, desc with html, annotations
+pasdom 48148712 (TEST CASE) - kaupunkilinnut, 3 photos and 1 sound, annotations, traditional projects, tag, observation fields
+
 (joku)hopeatäplä 53608382 - coll and trad projects, annotations (also negative)
 ohdakeperhonen 39330050 - locality names
 parmaj 61948403 - kaupunkilinnut, 9 photos
-pasdom 48148712 - kaupunkilinnut, 3 photos and 1 sound
 mittari 60201865 - karkeistettu -> box coordinates
 sieni lehdellä 60934016 - yksityinen -> ei koordinaatteja
 sammal 62132113 - ei koordinaattien tarkkuutta

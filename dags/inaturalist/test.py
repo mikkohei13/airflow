@@ -4,35 +4,48 @@ import json
 from collections import OrderedDict
 import inatToDw
 
+sourceFiles = []
+targetFiles = []
+
 # Files containing single or multiple observations as inat json
-filePath = "testdata/60201865.json"
-testFilePath = "testdata/60201865dw.json"
+sourceFiles.append("testdata/60201865-source.json")
+targetFiles.append("testdata/60201865-target.json")
 
-filePath = "testdata/61079103.json"
-testFilePath = "testdata/61079103dw.json"
+sourceFiles.append("testdata/48148712-source.json")
+targetFiles.append("testdata/48148712-target.json")
+
+sourceFiles.append("testdata/60934016-source.json")
+targetFiles.append("testdata/60934016-target.json")
+
+print("")
+print("__TESTS_STARTING______________________________")
 
 
+for fileNro, sourceFilePath in enumerate(sourceFiles):
 
-with open(filePath) as file:
-  inatJson = file.read()
-  file.close()
+  with open(sourceFilePath) as file:
+    inatJson = file.read()
+    file.close()
 
-#print(inatJson)
-inatOrdereddict = json.loads(inatJson, object_pairs_hook=OrderedDict)
+  #print(inatJson)
+  inatOrdereddict = json.loads(inatJson, object_pairs_hook=OrderedDict)
 
-#print(inatOrdereddict)
+  #print(inatOrdereddict)
 
-dwOrdereddict, lastUpdateKey = inatToDw.convertObservations(inatOrdereddict['results'])
+  dwOrdereddict, lastUpdateKey = inatToDw.convertObservations(inatOrdereddict['results'])
 
-#print(dwOrdereddict)
+  #print(dwOrdereddict)
 
-with open(testFilePath) as file:
-  testJson = file.read()
-  file.close()
+  with open(targetFiles[fileNro]) as file:
+    testJson = file.read()
+    file.close()
 
-testDwOrdereddict = json.loads(testJson, object_pairs_hook=OrderedDict)
+  testDwOrdereddict = json.loads(testJson, object_pairs_hook=OrderedDict)
 
-if testDwOrdereddict == dwOrdereddict:
-  print("SUCCESS!")
-else:
-  print("Failure")
+  if testDwOrdereddict == dwOrdereddict:
+    print("SUCCESS: " + str(lastUpdateKey))
+  else:
+    print("**********")
+    print("Failure: " + str(lastUpdateKey))
+    print("**********")
+

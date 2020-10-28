@@ -135,8 +135,6 @@ def summarizeAnnotation(annotation):
   value = annotation["controlled_value_id"]
   vote_score = annotation["vote_score"]
 
-  print(str(key) + ":::" + str(value))
-
   if 2 == value:
     key = "lifeStage"
     value = "ADULT"

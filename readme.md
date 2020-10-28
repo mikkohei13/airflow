@@ -45,7 +45,7 @@ iNat
 - CONVERSIONS:
   - test if date begin is missing
   - select production/dev coll ... how?
-  - annotation key 17 (inatHelpers)
+  - LATER: annotation key 17 (inatHelpers)
   - ASK: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
   - See TODO's from conversion script
 - ASK: Why dev.laji.fi does not seem to update all observations? (Slack with Esko)

@@ -206,8 +206,8 @@ def convertObservations(inatObservations):
     # Conversions
 
     # Data shared by all observations
-    # TODO: select production/dev coll ... how?
-    collectionId = "http://tun.fi/HR.3211" # production: HR.3211 Test: HR.11146
+    collectionId = "http://tun.fi/HR.3211"
+
     dw["collectionId"] = collectionId
     publicDocument['collectionId'] = collectionId
 
@@ -422,9 +422,8 @@ def convertObservations(inatObservations):
 
     # Quality on DW
 
-    # TODO: Refactor and test
     # Negative quality metrics (thumbs down) 
-    # TODO: Check: does this make issue, or mark as unreliable, or both on Laji.fi?
+    # This will make observation uncertain in dw, bot no issue
     if qualityMetricUnreliable:
       unit['sourceTags'].append("EXPERT_TAG_UNCERTAIN")
       keywords.append("quality-metric-unreliable")
