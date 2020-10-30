@@ -5,6 +5,10 @@ import json
 from collections import OrderedDict
 import time
 
+
+#def url():
+
+
 def getPageFromAPI(url):
   """Get a single pageful of observations from iNat.
 
@@ -40,12 +44,16 @@ def getPageFromAPI(url):
   return inatResponseDict
 
 
-def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleepSeconds):
+def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleepSeconds, urlSuffix = ""):
   """Generator that gets and yields new and updated iNat observations, by handling pagination and calling getPageFromAPI().
 
   Args:
     latestObsId (int): Highest observation id that should not be fetched.
     latestUpdateTime (string): Time after which updated observations should be fecthed.
+    pageLimit (int):
+    perPage (int):
+    sleepSeconds (int):
+    urlSuffix (string): Optional additional parameters for API request. Must start with "&".
 
   Raises:
     Exception: If getPageFromAPI() fails to fetch data.
@@ -55,27 +63,13 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
     boolean: Returns False when no more results.
   """
 
-  # TODO: Check if time(zone) is correct in Docker.
-
   page = 0
 
   while True:
     print("Getting page " + str(page) + " below " + str(pageLimit) + " latestObsId " + str(latestObsId) + " latestUpdateTime " + latestUpdateTime)
 
-    # TODO: Option to get only nonwilds
+    url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "&include_new_projects=true" + urlSuffix
 
-    url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "&include_new_projects=true"
-
-    # TODO: Remove this debugging part
-    # Debugging case where API does not respond correctly after n:th page
-#    debug = True
-#    if debug:
-#      if page > 0:
-        # User broken URI
-#        url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "00&include_new_projects=true"
-    # Debug end
-
-#    print("Getting URL " + url)
     inatResponseDict = getPageFromAPI(url)
 
     resultObservationCount = inatResponseDict["total_results"]

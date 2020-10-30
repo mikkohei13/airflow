@@ -2,6 +2,7 @@ import json
 import requests
 import datetime
 import sys
+import time
 
 from airflow.models import Variable
 
@@ -14,13 +15,50 @@ import postDw
 def printObject(object):
   print(object.__dict__)
 
+def setAirflowVariable(variable, value):
+  """Sets an Airflow variable. If setting fails, waits and tries again. If fails, exits with exception.
+
+  Args:
+    variable (string): Name of the variable to be set.
+    value (string): Value to be set.
+
+  Raises:
+    Exception: Setting fails after multiple tries.
+
+  Returns:
+    Nothing.
+  """
+
+  maxRetries = 3
+  sleepSeconds = 3
+
+  for _ in range(maxRetries):
+    try:
+      Variable.set(variable, value)
+    except:
+      print("Setting " + variable + " failed, sleeping " + sleepSeconds + " seconds")
+      time.sleep(sleepSeconds)
+      continue
+    else: # On success
+      break
+  else:
+    raise Exception("Setting " + variable + " failed after " + maxRetries + " retries")
+
 
 ### SETUP
 
 target = sys.argv[1] # staging | production
+mode = sys.argv[2] # auto | manual
 
-print("Start") 
+"""
+TODO:
+- Select variables based on auto vs. manual
+- When manual, get url suffix from variables, and set it on props
 
+"""
+
+print("------------------------------------------------") 
+print("Starting inat.py, target " + target) 
 
 # This will be the new updatedLast time in Variables. Generating update time here, since observations are coming from the API sorted by id, not by datemodified -> cannot use time of last record
 now = datetime.datetime.now()
@@ -29,38 +67,44 @@ thisUpdateTime = thisUpdateTime.replace(":", "%3A")
 thisUpdateTime = thisUpdateTime.replace("+", "%2B")
 
 # Get latest update data from Airflow variables
-if "staging" == target:
-  af_latest_obsId = Variable.get("inat_staging_latest_obsId")
-  af_latest_update = Variable.get("inat_staging_latest_update")
-elif "production" == target:
-  af_latest_obsId = Variable.get("inat_production_latest_obsId")
-  af_latest_update = Variable.get("inat_production_latest_update")
+if "auto" == mode:
+  urlSuffix = ""
+  if "staging" == target:
+    variableName_latest_obsId = "inat_auto_staging_latest_obsId"
+    variableName_latest_update = "inat_auto_staging_latest_update"
+  elif "production" == target:
+    variableName_latest_obsId = "inat_auto_production_latest_obsId"
+    variableName_latest_update = "inat_auto_production_latest_update"
+if "manual" == mode:
+  urlSuffix = Variable.get("inat_MANUAL_urlSuffix")
+  if "staging" == target:
+    variableName_latest_obsId = "inat_MANUAL_staging_latest_obsId"
+    variableName_latest_update = "inat_MANUAL_staging_latest_update"
+  elif "production" == target:
+    variableName_latest_obsId = "inat_MANUAL_production_latest_obsId"
+    variableName_latest_update = "inat_MANUAL_production_latest_update"
 
-#af_latest_obsId = 60063865 # debug
+
+AirflowLatestObsId = Variable.get(variableName_latest_obsId)
+AirflowLatestUpdate = Variable.get(variableName_latest_update)
 
 
 # GET
 
 page = 1
 
-props = { "sleepSeconds": 5, "perPage": 100, "pageLimit": 1000 } # Prod
-props = { "sleepSeconds": 2, "perPage": 100, "pageLimit": 10 } # Debug
+props = { "sleepSeconds": 5, "perPage": 100, "pageLimit": 10000, "urlSuffix": urlSuffix } # Prod
+#props = { "sleepSeconds": 2, "perPage": 10, "pageLimit": 100, "urlSuffix": urlSuffix } # Debug
 
 
 # For each pageful of data
-for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_latest_update, **props):
-  print("Page: " + str(page)) # debug
-#  print(multiObservationDict)
+for multiObservationDict in getInat.getUpdatedGenerator(AirflowLatestObsId, AirflowLatestUpdate, **props):
 
   # If no more observations on page, finish the process by saving update time and resetting observation id to zero.
   if False == multiObservationDict:
     print("Finishing, setting latest update to " + thisUpdateTime)
-    if "staging" == target:
-      Variable.set("inat_staging_latest_update", thisUpdateTime)
-      Variable.set("inat_staging_latest_obsId", 0)
-    elif "production" == target:
-      Variable.set("inat_production_latest_update", thisUpdateTime)
-      Variable.set("inat_production_latest_obsId", 0)
+    setAirflowVariable(variableName_latest_update, thisUpdateTime)
+    setAirflowVariable(variableName_latest_obsId, 0)
     break
 
   # CONVERT
@@ -72,46 +116,15 @@ for multiObservationDict in getInat.getUpdatedGenerator(af_latest_obsId, af_late
 
   # If this pageful contained data, and was saved successfully to DW, set latestObsId as variable
   if postSuccess:
-    if "staging" == target:
-      Variable.set("inat_staging_latest_obsId", latestObsId)
-    elif "production" == target:
-      Variable.set("inat_production_latest_obsId", latestObsId)
+    setAirflowVariable(variableName_latest_obsId, latestObsId)
 
   if page < props["pageLimit"]:
     page = page + 1
   else:
     # Exception because this should not happen in production (happens only if pageLimit is too low compared to frequency of this script being run)
-    raise Exception("Page limit " + str(props["pageLimit"]) + " reached.")
+    raise Exception("Page limit " + str(props["pageLimit"]) + " reached, this means that either page limit is set for debugging, or value is too low for production.")
 
 
+print("End") 
+print("------------------------------------------------") 
 
-# -----------------------------------------------------------
-# OLDs
-# -----------------------------------------------------------
-
-### CONVERT
-
-#print(singleObservationDict)
-
-#dwObservationDict = inatToDw.convertObservation(singleObservationDict)
-#print(dwObservationDict)
-
-#dwObservationJson = json.dumps(dwObservationDict)
-
-#pprint(inatResponse)
-
-
-### POST
-
-
-
-#dataJson = json.dumps(data)
-#print(dataJson)
-
-#dw.postSingleMock(dwObservationJson)
-
-# extracting data in json format 
-#data = req.json() 
-#print(data)
-
-print("Script ended")
