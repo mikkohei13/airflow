@@ -70,6 +70,9 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
 
     url = "https://api.inaturalist.org/v1/observations?place_id=7020%2C10282&page=1&per_page=" + str(perPage) + "&order=asc&order_by=id&updated_since=" + latestUpdateTime + "&id_above=" + str(latestObsId) + "&include_new_projects=true" + urlSuffix
 
+    if " " in url:
+      raise Exception("iNat API url malformed, contains space(s)")
+
     inatResponseDict = getPageFromAPI(url)
 
     resultObservationCount = inatResponseDict["total_results"]

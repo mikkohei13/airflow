@@ -15,6 +15,20 @@ import postDw
 def printObject(object):
   print(object.__dict__)
 
+# TODO: This is not used yet. Use or remove?
+def getAirflowVariable(variableName):
+  """Gets an Airflow variable and removes leading & trailing whitespace, so that it user has included these in error, they won't affect the scripts.
+
+  Args:
+    variableName (string): Name of the Airflow variable to get.
+
+  Returns:
+    Variable with leading and trailing whitespace removed.
+  """
+  variable = Variable.get(variableName)
+  return variable.strip()
+
+
 def setAirflowVariable(variable, value):
   """Sets an Airflow variable. If setting fails, waits and tries again. If fails, exits with exception.
 
@@ -93,7 +107,7 @@ AirflowLatestUpdate = Variable.get(variableName_latest_update)
 
 page = 1
 
-props = { "sleepSeconds": 5, "perPage": 100, "pageLimit": 10000, "urlSuffix": urlSuffix } # Prod
+props = { "sleepSeconds": 10, "perPage": 100, "pageLimit": 10000, "urlSuffix": urlSuffix } # Prod
 #props = { "sleepSeconds": 2, "perPage": 10, "pageLimit": 100, "urlSuffix": urlSuffix } # Debug
 
 

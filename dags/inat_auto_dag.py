@@ -10,13 +10,13 @@ from airflow.operators.bash_operator import BashOperator
 # You can override them on a per-task basis during operator initialization
 default_task_arguments = {
     'owner': 'airflow',
-    'depends_on_past': True, # Prevents new task being triggered if the previous schedule for the 
+    'depends_on_past': True, # Prevents new task being triggered if the previous schedule for the task has not finished successfully. 
     'start_date': datetime.datetime(2020, 10, 1),
     'email': ['mikkohei13+airflow@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 3,
-    'retry_delay': datetime.timedelta(minutes = 2),
+    'retry_delay': datetime.timedelta(minutes = 1),
     # 'queue': 'bash_queue',
     # 'pool': 'backfill',
     # 'priority_weight': 10,
@@ -40,8 +40,8 @@ dag = DAG(
     'inat_auto',
     catchup = False, # Since the script handles its own catchup
     default_args = default_task_arguments,
-    description = 'DAG to iNaturalist observations automatically in sync.',
-    max_active_runs = 1, # Prevent overlapping runs, which would use same variables. TEST
+    description = 'DAG to keep iNaturalist observations automatically in sync.',
+    max_active_runs = 1, # Prevent overlapping runs, which would use same variables. TODO: TEST
     schedule_interval = datetime.timedelta(minutes = 10)
 )
 
@@ -56,7 +56,7 @@ copyTask = BashOperator(
 #    depends_on_past = True,
 #    bash_command=templated_command,
 #    python_callable=print_context, # python operator
-    bash_command = 'python3 /opt/airflow/dags/inaturalist/inat.py staging auto', # On Docker, you need to refer with absolute path
+    bash_command = 'python3 /opt/airflow/dags/inaturalist/inat.py production auto', # On Docker, you need to refer with absolute path
 #    params={'my_param': 'Parameter I passed in'},
     dag = dag,
 )

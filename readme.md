@@ -42,6 +42,7 @@ Get updated observations and post to DW:
 
 iNat
 - Monitor if iNat API changes (test observation)
+- Learn how max_active_runs works. Mark depends_on_past False.
 - CONVERSIONS:
   - LATER: annotation key 17 (inatHelpers)
   - ASK: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
