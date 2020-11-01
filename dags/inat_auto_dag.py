@@ -10,7 +10,7 @@ from airflow.operators.bash_operator import BashOperator
 # You can override them on a per-task basis during operator initialization
 default_task_arguments = {
     'owner': 'airflow',
-    'depends_on_past': True, # Prevents new task being triggered if the previous schedule for the task has not finished successfully. 
+    'depends_on_past': True, # Prevents new task being triggered if the previous run of the task has not finished successfully. 
     'start_date': datetime.datetime(2020, 10, 1),
     'email': ['mikkohei13+airflow@gmail.com'],
     'email_on_failure': True,
@@ -32,23 +32,16 @@ default_task_arguments = {
     # 'trigger_rule': 'all_success'
 }
 
-# TODO: WARNING - schedule_interval is used for <Task(BashOperator): inaturalist_copy>, though it has been deprecated as a task parameter, you need to specify it as a DAG parameter instead
-
-
+# TODO: If UTC time between 21-03 -> schedule_interval = None 
 
 dag = DAG(
     'inat_auto',
     catchup = False, # Since the script handles its own catchup
     default_args = default_task_arguments,
     description = 'DAG to keep iNaturalist observations automatically in sync.',
-    max_active_runs = 1, # Prevent overlapping runs, which would use same variables. TODO: TEST
-    schedule_interval = datetime.timedelta(minutes = 10)
+    max_active_runs = 1, # Prevent overlapping runs, which would use same variables. TODO: TEST, works inconsistently
+    schedule_interval = datetime.timedelta(minutes = 30)
 )
-
-#def print_context(ds, **kwargs):
-#    pprint(kwargs)
-#    print(ds)
-#    return 'Hoi iNat!'
 
 copyTask = BashOperator(
     task_id = 'inat_auto_copyTask',
