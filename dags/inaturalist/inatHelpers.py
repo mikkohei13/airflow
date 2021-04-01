@@ -180,11 +180,27 @@ def summarizeAnnotation(annotation):
 #    print("Annotation " + str(key) + " = " + str(value) + " vote tied")
     return "keyword", "annotation_tie"
 
+
 def getProxyUrl(squareUrl, imageSize):
   url = squareUrl.replace("square", imageSize)
-  url = url.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/")
 
+  # TODO: User full URL when CC-images moved to free bucket 
   return url
 
+  '''
+  # Rudimentatry test that URL is expected.
+  # TODO: Test for changes in the URL's
+  if not url.startswith("https://inaturalist-open-data.s3.amazonaws.com/photos/"):
+    print("Skipping image with unexpected url ", url)
+    return ""
+
+  splitUrl = url.split("/photos/")
+  proxyUrl = "https://proxy.laji.fi/inaturalist/photos/" + splitUrl[1]
+#  print(proxyUrl)
+
+#  url = url.replace("https://static.inaturalist.org/photos/", "https://proxy.laji.fi/inaturalist/photos/")
+
+  return proxyUrl
+  '''
 
 

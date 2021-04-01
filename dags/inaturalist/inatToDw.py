@@ -19,7 +19,6 @@ NOTES/CHANGES COMPARED TO PHP-VERSION 9/2020:
 - DW removes/hides humans, so handling them here is not needed. (Used to make them private, remove images and description.)
 - What to do if observation contains 1...n copyright infringement flagged media files? E.g. https://www.inaturalist.org/observations/46356508
 - Earlier removed FI, Finland & Suomi from the location name, but not anymore
-- Possibly TODO: Filter out unwanter users (e.g. test users: testaaja, outo)
 - Previously used copyright string, now just user name for photo attribution, since license in separate field.
 - Unit fact taxonByUser changed name to species_guess, which is the term used by iNat. Logic of this field in iNat is unclear.
 - observerActivityCount is not used, since it increases over time -> is affected by *when* the observation was fetched from iNat.
@@ -60,7 +59,7 @@ def appendKeyword(keywordList, inat, keywordName):
 def appendCollectionProjects(factsList, keywords, projects):
   for nro, project in enumerate(projects):
     keywords.append("project-" + str(project['project_id']))
-    factsList.append({ "fact": "collectionProjectId", "name": project['project_id'] })
+    factsList.append({ "fact": "collectionProjectId", "value": project['project_id'] })
   return factsList, keywords
 
 
@@ -358,6 +357,7 @@ def convertObservations(inatObservations):
       unitFacts.append({ "fact": val['name_ci'], "value": val['value_ci']}) # This preserves zero values, which can be important in observation fields
       if "Specimen" == val['name_ci']:
         hasSpecimen = True
+      # TODO: Yksilömäärä field -> count
 
 
     # Record basis
