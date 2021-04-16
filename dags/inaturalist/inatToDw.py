@@ -353,11 +353,16 @@ def convertObservations(inatObservations):
 
     # Observation fields
     hasSpecimen = False
+    abundanceString = ""
+
     for nro, val in enumerate(inat['ofvs']):
       unitFacts.append({ "fact": val['name_ci'], "value": val['value_ci']}) # This preserves zero values, which can be important in observation fields
       if "Specimen" == val['name_ci']:
         hasSpecimen = True
-      # TODO: Yksilömäärä field -> count
+      if "Yksilömäärä" == val['name_ci']:
+        abundanceString = val['value_ci']
+
+    unit['abundanceString'] = abundanceString
 
 
     # Record basis
