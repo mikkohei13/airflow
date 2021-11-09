@@ -81,6 +81,7 @@ def getCoordinates(inat):
 def convertTaxon(taxon):
   convert = {}
 
+  # Conversions from -> to
   convert['Life'] = "Biota"
   convert['unknown'] = "Biota"
   convert['Elämä'] = "Biota" # Is this needed?
@@ -96,6 +97,11 @@ def convertTaxon(taxon):
   convert['Chenopodium album'] = "Chenopodium album -ryhmä"
   convert['Imparidentia'] = "Heterodonta" # hieta- ja liejusimpukan alin yhteinen taksoni
   convert['Canis familiaris'] = "Canis lupus familiaris" # koira
+  convert['Anguis colchica'] = "Anguis fragilis" # vaskitsan erilaiset lajikäsitteet tulkitaan  A.fragilikseksi
+  convert['Anguis'] = "Anguis fragilis" # vaskitsan erilaiset lajikäsitteet tulkitaan A.fragilikseksi
+  convert['Monotropa'] = "Hypopitys"
+  convert['Monotropa hypopitys'] = "Hypopitys monotropa" # kangasmäntykukka
+  convert['Monotropa hypopitys ssp. hypophegea'] = "Hypopitys hypophegea" # kaljumäntykukka
 
   if not taxon: # Empty, False, Null/None
     return ""  

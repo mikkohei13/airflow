@@ -44,15 +44,25 @@ Get updated observations and post to DW. Replace `staging` with `production` in 
 * inat_auto_staging_latest_obsId (e.g. `0`)
 * inat_auto_staging_latest_update (e.g. `2020-10-31T19%3A16%3A43%2B00%3A00`)
 
-
     python3 inat.py staging auto
 
 Get updated observations and post to DW. This also depends on variables on Airflow, including urlSuffix, which can be used to filter observations from iNat API:
 
 * inat_MANUAL_production_latest_obsId
 * inat_MANUAL_production_latest_update
-* inat_MANUAL_urlSuffix (e.g. `&captive=true`, `&quality_grade=casual`, or `&` for no filtering)
+* inat_MANUAL_urlSuffix
+* Example suffixes:
+   * `&captive=true`
+   * `&quality_grade=casual`
+   * `&user_id=username`
+   * `&project_id=105081`
+   * `&photo_licensed=true`
+   * `&taxon_name=Monotropa` # only this taxon, not children
+   * `&taxon_id=211194` # Tracheophyta; this taxon and children
+   * `&quality_grade=casual`
+   * `&` for no filtering
 
+Use iNaturalist API documentation to see what kind of parameters you can give: https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
 
     python3 inat.py staging manual
 
@@ -100,6 +110,15 @@ Prints the list of tasks the "tutorial" dag_id
 Prints the hierarchy of tasks in the tutorial DAG
 
     airflow list_tasks tutorial --tree
+
+
+# Why observation on iNat is not visible on Laji.fi?
+
+- Laji.fi hides non-wild observations by default
+- Laji.fi hides observations that have issues, or have been annotated as erroneous
+- Laji.fi obscures certain sensitive species, which then cannot be found using all filters
+- ETL process and annotations can cange e.g. taxon, so that the observation cannot be found with the original name
+- If observation has first been private, and then changed to public, it may not be copied by the regular copy process
 
 
 # Reading
