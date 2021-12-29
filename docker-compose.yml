@@ -16,7 +16,7 @@ services:
 
     scheduler:
         container_name: airflow_scheduler
-        image: apache/airflow # TODO: Add 1.10.12
+        image: apache/airflow:1.10.12 # TODO: Add 1.10.12
         command: scheduler
 #        restart_policy: # original from example
 #            condition: on-failure
@@ -31,7 +31,7 @@ services:
 
     webserver:
         container_name: airflow_webserver
-        image: apache/airflow # TODO: Add 1.10.12
+        image: apache/airflow:1.10.12 # TODO: Add 1.10.12
         entrypoint: ./scripts/entrypoint.sh
 #        restart_policy: # original from example
 #            condition: on-failure

@@ -13,7 +13,7 @@ To set up:
     chmod -R 777 dags/
     chmod -R 777 scripts/
 
-Set environment variables to `.env`.
+Set environment variables to `.env` or use default ones.
 
 Note that `AIRFLOW__CORE__FERNET_KEY` and `FERNET_KEY` have to be must be 32 url-safe base64-encoded bytes. These can be generated with `openssl rand -base64 32`
 
