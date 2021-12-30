@@ -10,5 +10,5 @@ af/
 ownNotes.md
 test-nogit/
 
-
+postgres-volume*
 dags/inaturalist/privatedata/*
