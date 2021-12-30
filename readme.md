@@ -70,26 +70,32 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 
 # Todo
 
-- MUST:
+- KNOWN ISSUES:
+  - Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
+    - https://github.com/docker/compose/pull/9019
+
+- MUST FOR PRODUCTION:
   - Test with own observation that API response stays the same 
   - Send email on failure
   - Setup proper env values, password-protect webserver ui https://airflow.apache.org/docs/stable/security.html
   - Limit DAG refresh time (now ~3 secs)
   - Log cleanup https://github.com/teamclairvoyant/airflow-maintenance-dags/tree/master/log-cleanup
   - Fix date created timezone
-  - Docker-compose with image version numbers?
-  - Setup & test email notifications
+
 - SHOULD:
   - Log level setup https://github.com/apache/airflow/pull/2191
   - iNat: Setup delete command
   - iNat: Setup (unit) testing
   - Monitor if iNat API changes (test observation)
+  - Setup & test email notifications
+
 - NICE:
   - Set processor_poll_interval to e.g. 15 secs
   - Conversion: annotation key 17 (inatHelpers)
   - Conversion: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
   - Conversion: See todo's from conversion script
   - Store original observations from inat, where?
+
 - ASK: Why dev.laji.fi does not seem to update all observations? (Slack with Esko)
 
 # Testing
