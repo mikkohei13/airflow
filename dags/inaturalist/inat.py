@@ -10,6 +10,11 @@ import getInat
 import inatToDw
 import postDw
 
+import pandas
+
+#import pathlib
+#import os
+
 
 # Temp helper
 def printObject(object):
@@ -61,8 +66,20 @@ def setAirflowVariable(variable, value):
 
 ### SETUP
 
+#print(pathlib.Path(__file__).parent.resolve()) # /opt/airflow/dags/inaturalist
+#exit("DONE")
+
+#cwd = os.getcwd()
+#print(cwd) # /tmp/airflowtmpa_qykltg
+#exit("CWD DONE")
+
+
 target = sys.argv[1] # staging | production
 mode = sys.argv[2] # auto | manual
+
+# Load private data
+# TODO: can we avoid root paths, to be able to run this from command line also?
+privateObservationData = pandas.read_csv("/opt/airflow/dags/inaturalist/privatedata/test.tsv", sep='\t') 
 
 """
 TODO:
@@ -122,7 +139,7 @@ for multiObservationDict in getInat.getUpdatedGenerator(AirflowLatestObsId, Airf
     break
 
   # CONVERT
-  dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'])
+  dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'], privateObservationData)
 
   # POST
   # TODO: set production vs staging

@@ -8,6 +8,9 @@ import postDw
 
 import json
 
+import pandas
+
+
 """
 Test observations
 puolukkapiiloyökkönen 60063865 (TEST CASE) - tags, obs fields, desc with html, annotations
@@ -32,11 +35,14 @@ https://www.inaturalist.org/flags?commit=Suodata&flaggable_type=Observation&flag
 id = sys.argv[1] # id of the iNat observation
 target = sys.argv[2] # dry | production
 
+# Load private data
+privateObservationData = pandas.read_csv("privatedata/test.tsv", sep='\t')
+
 
 # Get and transform data
 singleObservationDict = getInat.getSingle(id)
 
-dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'])
+dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'], privateObservationData)
 
 #print("TEMP DEBUG lastUpdateKey: " + str(lastUpdateKey))
 

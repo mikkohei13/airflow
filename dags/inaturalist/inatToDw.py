@@ -2,6 +2,7 @@
 #from collections import defaultdict
 import pprint
 import json # for debug
+import copy
 
 import inatHelpers
 
@@ -34,13 +35,13 @@ DW data features:
 
 
 def skipObservation(inat):
-  # Note: This is only for skipping observations that don't YET have enough infor to be worthwhile to be included to DW. Don't skip e.g. spam here, because then spammy observations would stay in DW forever. Instead mark them as having issues.
+  # Note: This is only for skipping observations that don't YET have enough info to be worthwhile to be included to DW. Don't skip e.g. spam here, because then spammy observations would stay in DW forever. Instead mark them as having issues.
 
   if not inat["taxon"]:
-    print("skipping " + str(inat["id"]) + " without taxon.")
+    print(" skipping " + str(inat["id"]) + " without taxon.")
     return True
   elif not inat["observed_on_details"]:
-    print("skipping " + str(inat["id"]) + " without date.")
+    print(" skipping " + str(inat["id"]) + " without date.")
     return True
   else:
     return False
@@ -141,7 +142,15 @@ def getImageData(photo, observer):
   return photoDict
 
 
-def convertObservations(inatObservations):
+# Check if is NaN value
+def hasValue(val):
+  if val == val:
+    return True
+  else:
+    return False
+
+
+def convertObservations(inatObservations, privateObservationData):
   """Convert observations from iNat to FinBIF DW format.
 
   Args:
@@ -158,13 +167,27 @@ def convertObservations(inatObservations):
   - obs without observed_on_details
   """
 
+
   dwObservations = []
   lastUpdateKey = 0
 
   # For each observation
   for nro, inat in enumerate(inatObservations):
-    print("Converting obs " + str(inat["id"]), end = " ... ")
 
+    # Get private data
+    privateData = privateObservationData.loc[privateObservationData['id'] == inat["id"]]
+    privateData = privateData.to_dict(orient='records')
+
+    if privateData:
+      logSuffix = " has private data"
+      privateData = privateData[0]
+    else:
+      logSuffix = ""
+      privateData = None
+
+    print("Converting obs " + str(inat["id"]), end = logSuffix)
+
+#    exit()
     
     # Debug
 #    jsonData = json.dumps(inat)
@@ -227,10 +250,8 @@ def convertObservations(inatObservations):
 
     # Taxon
     # Special handling for heracleums, to get giant hogweed records
-    # ABBA
     if "Heracleum" in inat['taxon']['name']:
       # loop identificatons. If any of them suggests any giant hogweed, and none suggests european hogweed, set as giant hogweed
-      print("Heracleum")
       unit['taxonVerbatim'] = inatHelpers.convertTaxon(inat['taxon']['name'])
 
     else:
@@ -514,7 +535,6 @@ def convertObservations(inatObservations):
     if inat['mappable']:
       gathering['coordinates'] = inatHelpers.getCoordinates(inat)
 
-
     # -------------------------------------
     # Build the multidimensional dictionary
 
@@ -533,12 +553,47 @@ def convertObservations(inatObservations):
     dw['publicDocument'] = publicDocument
 
 
+    # -------------------------------------
+    # Get private data for PAP
+    '''
+    Prepare for
+    - private data is partial, includes nan values
+    '''
+
+    if privateData:
+      privateDocument = copy.deepcopy(publicDocument)
+
+      # keyword append privatedata
+      privateDocument["keywords"].append("privatedata")
+
+      if hasValue(privateData["observed_on"]):
+        privateDocument["gatherings"][0]["eventDate"]["begin"] = privateData["observed_on"]
+        privateDocument["gatherings"][0]["eventDate"]["end"] = privateData["observed_on"]
+
+      if hasValue(privateData["private_longitude"]):
+        privateDocument["gatherings"][0]["coordinates"]["lonMin"] = privateData["private_longitude"]
+        privateDocument["gatherings"][0]["coordinates"]["lonMax"] = privateData["private_longitude"]
+        privateDocument["gatherings"][0]["coordinates"]["latMin"] = privateData["private_latitude"]
+        privateDocument["gatherings"][0]["coordinates"]["latMax"] = privateData["private_latitude"]
+
+      if hasValue(privateData["positional_accuracy"]):
+        privateDocument["gatherings"][0]["coordinates"]["accuracyInMeters"] = privateData["positional_accuracy"]
+      
+      if hasValue(privateData["private_place_guess"]):
+        privateDocument["gatherings"][0]["locality"] = privateData["private_place_guess"]
+
+      dw['privateDocument'] = privateDocument
+
+
+    # -------------------------------------
+    # Finalize
+
     dwObservations.append(dw)
 
     # Store last converted observation
     lastUpdateKey = inat["id"]
 
-    print("converted " + str(inat["id"]))
+    print(" -> done " + str(inat["id"]))
 
 
   # End for each observations
