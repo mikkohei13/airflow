@@ -66,7 +66,26 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 
     python3 inat.py staging manual
 
+# How it works
 
+* Airflow has DAG's for automatic and manual updates (http://localhost:8082/admin/)
+* inat_auto
+   * Airflow runs this every 30 minutes and handles retries of something goes wrong
+       * If the DAG ends up in an erroneous state, it will have to be cleared (set as successful manually) before the automatic update can continue
+   * Calls `python3 /opt/airflow/dags/inaturalist/inat.py production auto`
+   * inat.py
+       * Get startup variables from Airflow
+       * Gets data from iNat and goes through it page-by-page. Uses custom pagination, since iNat pagination does not work past 333 (?) pages.
+    * inatToDW.py
+       * Converts all observations to DW format and returns to inat.py
+    * postDW.py
+       * Posts all observations to FinBIF DW
+    * inat.py
+       * If success, sets vatiables to Airflow
+
+* inat_manual
+    * This can be triggered manually via Airflow, to update e.g. captive records
+    * Set preferences under Airflow Admin > Variables
 
 # Todo
 
@@ -118,13 +137,13 @@ Prints the hierarchy of tasks in the tutorial DAG
     airflow list_tasks tutorial --tree
 
 
-# Why observation on iNat is not visible on Laji.fi?
+# FAQ: Why observation on iNat is not visible on Laji.fi?
 
 - Laji.fi hides non-wild observations by default
 - Laji.fi hides observations that have issues, or have been annotated as erroneous
 - Laji.fi obscures certain sensitive species, which then cannot be found using all filters
-- ETL process and annotations can cange e.g. taxon, so that the observation cannot be found with the original name
-- If observation has first been private, and then changed to public, it may not be copied by the regular copy process
+- ETL process and annotations can change e.g. taxon, so that the observation cannot be found with the original name
+- If observation has first been private or captive, and then changed to public or non-captive, it may not be copied by the regular copy process
 
 
 # Reading
