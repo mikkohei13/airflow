@@ -37,7 +37,7 @@ To run scripts manually, start with:
 
 Debug single observation:
 
-    python3 single.py 71954693 dry 
+    python3 single.py 54911120 dry 
 
 Get updated observations and post to DW. Replace `staging` with `production` in order to push into production. This depends on variables in Airflow:
 
@@ -57,10 +57,11 @@ Get updated observations and post to DW. This also depends on variables on Airfl
    * `&user_id=username`
    * `&project_id=105081`
    * `&photo_licensed=true`
-   * `&taxon_name=Monotropa` # only this taxon, not children
+   * `&taxon_name=Parus%20major` # only this taxon, not children, use %20 for spaces
    * `&taxon_id=211194` # Tracheophyta; this taxon and children
    * `&quality_grade=casual`
    * `&` for no filtering
+   * `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate` # test with obscured  observations
 
 Use iNaturalist API documentation to see what kind of parameters you can give: https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
 
@@ -75,19 +76,41 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
    * Calls `python3 /opt/airflow/dags/inaturalist/inat.py production auto`
    * inat.py
        * Get startup variables from Airflow
+       * Loads private data to Pandas dataframe
        * Gets data from iNat and goes through it page-by-page. Uses custom pagination, since iNat pagination does not work past 333 (?) pages.
     * inatToDW.py
-       * Converts all observations to DW format and returns to inat.py
+       * Converts all observations to DW format
+       * Adds private data if it's available, to a privateDocument
     * postDW.py
-       * Posts all observations to FinBIF DW
+       * Posts all observations to FinBIF DW as a batch
     * inat.py
        * If success, sets vatiables to Airflow
 
 * inat_manual
     * This can be triggered manually via Airflow, to update e.g. captive records
     * Set preferences under Airflow Admin > Variables
+       * url suffix
+       * first id (set to 0)
+       * start time (change this!)
+
+# Preparing private data
+
+* Download private data from https://inaturalist.laji.fi/sites/20
+* Filter so that you have coordinates_obscrued=TRUE and place_country_name = Finnish or Åland data
+* Remove all columns except
+    * id
+    * observed_on
+    * private_longitude
+    * private_latitude
+    * positional_accuracy
+    * private_place_guess
+* Save as .tsv (tab-separated)
+* Place file to dags/inaturalist/privatedata/latest.tsv
 
 # Todo
+
+- TRY OUT:
+  - restart: unless-stopped
 
 - KNOWN ISSUES:
   - Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
