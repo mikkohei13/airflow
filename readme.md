@@ -96,15 +96,18 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 # Preparing private data
 
 * Download private data from https://inaturalist.laji.fi/sites/20
-* Filter so that you have coordinates_obscrued=TRUE and place_country_name = Finnish or Åland data
+* Filter so that you have
+   * coordinates_obscrued=TRUE
+   * place_country_name = Finnish or Åland data
+   * has private_latitude and private_longitude
 * Remove all columns except
     * id
     * observed_on
-    * private_longitude
-    * private_latitude
     * positional_accuracy
     * private_place_guess
-* Save as .tsv (tab-separated)
+    * private_latitude
+    * private_longitude
+* Save as .tsv (tab-separated) *with UTF-8*
 * Place file to dags/inaturalist/privatedata/latest.tsv
 
 # Todo

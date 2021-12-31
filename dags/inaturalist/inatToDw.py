@@ -236,6 +236,7 @@ def convertObservations(inatObservations, privateObservationData):
     publicDocument['concealment'] = "PUBLIC"
 
 
+    # Add secure reasons
     publicDocument['secureReasons'] = []
     if inat["taxon_geoprivacy"]:
       publicDocument['secureReasons'].append("DEFAULT_TAXON_CONSERVATION")
