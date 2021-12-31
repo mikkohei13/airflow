@@ -236,6 +236,13 @@ def convertObservations(inatObservations, privateObservationData):
     publicDocument['concealment'] = "PUBLIC"
 
 
+    publicDocument['secureReasons'] = []
+    if inat["taxon_geoprivacy"]:
+      publicDocument['secureReasons'].append("DEFAULT_TAXON_CONSERVATION")
+    if inat["geoprivacy"]:
+      publicDocument['secureReasons'].append("USER_HIDDEN_LOCATION")
+
+
     # Identifiers
     documentId = dw["collectionId"] + "/" + str(inat["id"])
     dw["documentId"] = documentId
@@ -555,13 +562,13 @@ def convertObservations(inatObservations, privateObservationData):
 
     # -------------------------------------
     # Get private data for PAP
-    '''
-    Prepare for
-    - private data is partial, includes nan values
-    '''
 
+    # Adds privateDocument only if there is some private data
     if privateData:
+      # Makes a deep copy
       privateDocument = copy.deepcopy(publicDocument)
+
+      privateDocument['concealment'] = "PRIVATE"
 
       # keyword append privatedata
       privateDocument["keywords"].append("privatedata")

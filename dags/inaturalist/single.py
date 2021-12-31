@@ -36,7 +36,7 @@ id = sys.argv[1] # id of the iNat observation
 target = sys.argv[2] # dry | production
 
 # Load private data
-privateObservationData = pandas.read_csv("privatedata/test.tsv", sep='\t')
+privateObservationData = pandas.read_csv("privatedata/latest.tsv", sep='\t')
 
 
 # Get and transform data

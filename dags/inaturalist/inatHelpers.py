@@ -23,7 +23,7 @@ def appendRootFact(factsList, inat, factName):
 
 def decimalFloor(n, decimals=1):
   multiplier = 10 ** decimals
-  return str(math.floor(n * multiplier) / multiplier)
+  return float(math.floor(n * multiplier) / multiplier)
 
 
 def getCoordinates(inat):
