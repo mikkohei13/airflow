@@ -391,19 +391,33 @@ def convertObservations(inatObservations, privateObservationData):
     # Observation fields
     hasSpecimen = False
     abundanceString = ""
+    atlasCode = None
 
     for nro, val in enumerate(inat['ofvs']):
       unitFacts.append({ "fact": val['name_ci'], "value": val['value_ci']}) # This preserves zero values, which can be important in observation fields
+
+      # Fields that are specifically supported by FinBIF
       if "Specimen" == val['name_ci']:
         hasSpecimen = True
       if "Yksilömäärä" == val['name_ci']:
         abundanceString = val['value_ci']
+      if "Lintuatlas, pesimävarmuusindeksi" == val['name_ci']:
+        atlasCode = inatHelpers.extractAtlasCode("atl:" + val['value_ci'])
 
     unit['abundanceString'] = abundanceString
 
+    # Maybe todo: Get atlascode only if is a bird (iconic_taxon_name == Aves)
+    # If atlasCode not from observation field, try to get it from description
+    if None == atlasCode:
+      atlasCode = inatHelpers.extractAtlasCode(inat["description"])
+    
+    # Set atlasCode as a fact
+    # TODO: Set to dedicated field instead, once available
+    if None != atlasCode:
+      unitFacts.append({ "fact": "atlasCode", "value": atlasCode})
+    else:
 
     # Record basis
-    # TODO: Refactor into function
     if hasSpecimen:
       unit['recordBasis'] = "PRESERVED_SPECIMEN"
     elif photoCount >= 1:

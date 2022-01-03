@@ -9,6 +9,49 @@ def appendFact(factsList, factLabel, factValue = False):
   return factsList
 """
 
+# Extracts and validates atlascode from text string
+# Returns None if no valid atlascode found
+# Dev version of this function is on the file atlascode.py
+def extractAtlasCode(text):
+    numbers = ["0","1","2","3","4","5","6","7","8","9"]
+
+    # to lowercase
+    text = text.lower()
+
+    # Check if text contains atlas keyword
+    try:
+        index = text.index("atl:")
+    except ValueError:
+        return None
+    else:
+        text = text.replace("atl: ", "atl:")
+
+        start = index + 4
+        end = start + 2
+        atlasCode = text[start:end]
+
+        # If code length is 2, and if trailing char is not a number, remove it 
+        if len(atlasCode) == 2:
+            trailingChar = atlasCode[1:2]
+            if not trailingChar in numbers:
+                atlasCode = atlasCode[0:1]
+
+        # If char after atlascode is number, it's probably an error
+#        charAfterAtlasCode = text[end:(end + 1)]
+#        if charAfterAtlasCode in numbers:
+#            print("Char after atlascode is number: " + text)
+
+    # Remove trailing zero
+    atlasCode = atlasCode.strip("0")
+
+    allowedAtlasCodes = ["1","2","3","4","5","6","7","8","61","62","63","64","65","66","71","72","73","74","75","81","82"]
+
+    # Check if code is allowed
+    if atlasCode in allowedAtlasCodes:
+        return int(atlasCode)
+    else:
+        print("Disallowed atlascode skipped: " + atlasCode)
+        return None
 
 
 def appendRootFact(factsList, inat, factName):
