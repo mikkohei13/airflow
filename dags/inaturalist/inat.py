@@ -79,7 +79,11 @@ mode = sys.argv[2] # auto | manual
 
 # Load private data
 # TODO: can we avoid root paths, to be able to run this from command line also?
+print("Loading private data")
 privateObservationData = pandas.read_csv("/opt/airflow/dags/inaturalist/privatedata/latest.tsv", sep='\t') 
+rowCount = len(privateObservationData.index)
+print("Loaded " + str(rowCount) + " rows")
+
 
 """
 TODO:
