@@ -416,16 +416,15 @@ def convertObservations(inatObservations, privateObservationData):
     if None != atlasCode:
       unitFacts.append({ "fact": "atlasCode", "value": atlasCode})
     else:
-
-    # Record basis
-    if hasSpecimen:
-      unit['recordBasis'] = "PRESERVED_SPECIMEN"
-    elif photoCount >= 1:
-      unit['recordBasis'] = "HUMAN_OBSERVATION_PHOTO"
-    elif soundCount >= 1:
-      unit['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO"
-    else:
-      unit['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED"
+      # Record basis
+      if hasSpecimen:
+        unit['recordBasis'] = "PRESERVED_SPECIMEN"
+      elif photoCount >= 1:
+        unit['recordBasis'] = "HUMAN_OBSERVATION_PHOTO"
+      elif soundCount >= 1:
+        unit['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO"
+      else:
+        unit['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED"
 
 
     # License URL's/URI's
@@ -554,6 +553,7 @@ def convertObservations(inatObservations, privateObservationData):
 
 
     # Coordinates
+    # Note that observation can have mappable == false, even though it has coordinates. Example: 87717426 because its has very large error radius
     if inat['mappable']:
       gathering['coordinates'] = inatHelpers.getCoordinates(inat)
 
@@ -592,15 +592,16 @@ def convertObservations(inatObservations, privateObservationData):
         privateDocument["gatherings"][0]["eventDate"]["begin"] = privateData["observed_on"]
         privateDocument["gatherings"][0]["eventDate"]["end"] = privateData["observed_on"]
 
-      if hasValue(privateData["private_longitude"]):
-        privateDocument["gatherings"][0]["coordinates"]["lonMin"] = privateData["private_longitude"]
-        privateDocument["gatherings"][0]["coordinates"]["lonMax"] = privateData["private_longitude"]
-        privateDocument["gatherings"][0]["coordinates"]["latMin"] = privateData["private_latitude"]
-        privateDocument["gatherings"][0]["coordinates"]["latMax"] = privateData["private_latitude"]
+      if inat['mappable']:
+        if hasValue(privateData["private_longitude"]):        
+          privateDocument["gatherings"][0]["coordinates"]["lonMin"] = privateData["private_longitude"]
+          privateDocument["gatherings"][0]["coordinates"]["lonMax"] = privateData["private_longitude"]
+          privateDocument["gatherings"][0]["coordinates"]["latMin"] = privateData["private_latitude"]
+          privateDocument["gatherings"][0]["coordinates"]["latMax"] = privateData["private_latitude"]
 
-      if hasValue(privateData["positional_accuracy"]):
-        privateDocument["gatherings"][0]["coordinates"]["accuracyInMeters"] = privateData["positional_accuracy"]
-      
+        if hasValue(privateData["positional_accuracy"]):
+          privateDocument["gatherings"][0]["coordinates"]["accuracyInMeters"] = privateData["positional_accuracy"]
+        
       if hasValue(privateData["private_place_guess"]):
         privateDocument["gatherings"][0]["locality"] = privateData["private_place_guess"]
 

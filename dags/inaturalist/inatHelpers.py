@@ -13,6 +13,9 @@ def appendFact(factsList, factLabel, factValue = False):
 # Returns None if no valid atlascode found
 # Dev version of this function is on the file atlascode.py
 def extractAtlasCode(text):
+    if None == text:
+      return None
+
     numbers = ["0","1","2","3","4","5","6","7","8","9"]
 
     # to lowercase
@@ -50,7 +53,7 @@ def extractAtlasCode(text):
     if atlasCode in allowedAtlasCodes:
         return int(atlasCode)
     else:
-        print("Disallowed atlascode skipped: " + atlasCode)
+        print(" Disallowed atlascode skipped: " + atlasCode, end = " ")
         return None
 
 

@@ -59,8 +59,10 @@ if "dry-verbose" == target:
 
 if "dry-verbose" == target or "dry" == target:
   print("--------------------------------------------------------------")
-  print("DW:")
+  print("pp.pprint(dwObservation):")
   pp.pprint(dwObservation)
+
   print("--------------------------------------------------------------")
+  print("json.dumps(dwObservation):")
   print(json.dumps(dwObservation))
 
