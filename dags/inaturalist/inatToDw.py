@@ -237,10 +237,11 @@ def convertObservations(inatObservations, privateObservationData):
 
 
     # Add secure reasons
+    # null or "open" means that observation is not private 
     publicDocument['secureReasons'] = []
-    if inat["taxon_geoprivacy"]:
+    if not ("open" == inat["taxon_geoprivacy"] or None == inat["taxon_geoprivacy"]):
       publicDocument['secureReasons'].append("DEFAULT_TAXON_CONSERVATION")
-    if inat["geoprivacy"]:
+    if not ("open" == inat["geoprivacy"] or None == inat["geoprivacy"]):
       publicDocument['secureReasons'].append("USER_HIDDEN_LOCATION")
 
 
@@ -412,19 +413,19 @@ def convertObservations(inatObservations, privateObservationData):
       atlasCode = inatHelpers.extractAtlasCode(inat["description"])
     
     # Set atlasCode as a fact
-    # TODO: Set to dedicated field instead, once available
     if None != atlasCode:
-      unitFacts.append({ "fact": "atlasCode", "value": atlasCode})
+#      unitFacts.append({ "fact": "atlasCode", "value": atlasCode})
+      unit['atlasCode'] = "http://tun.fi/MY.atlasCodeEnum" + atlasCode
+
+    # Record basis
+    if hasSpecimen:
+      unit['recordBasis'] = "PRESERVED_SPECIMEN"
+    elif photoCount >= 1:
+      unit['recordBasis'] = "HUMAN_OBSERVATION_PHOTO"
+    elif soundCount >= 1:
+      unit['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO"
     else:
-      # Record basis
-      if hasSpecimen:
-        unit['recordBasis'] = "PRESERVED_SPECIMEN"
-      elif photoCount >= 1:
-        unit['recordBasis'] = "HUMAN_OBSERVATION_PHOTO"
-      elif soundCount >= 1:
-        unit['recordBasis'] = "HUMAN_OBSERVATION_RECORDED_AUDIO"
-      else:
-        unit['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED"
+      unit['recordBasis'] = "HUMAN_OBSERVATION_UNSPECIFIED"
 
 
     # License URL's/URI's

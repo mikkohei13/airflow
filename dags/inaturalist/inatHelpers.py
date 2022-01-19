@@ -49,9 +49,10 @@ def extractAtlasCode(text):
 
     allowedAtlasCodes = ["1","2","3","4","5","6","7","8","61","62","63","64","65","66","71","72","73","74","75","81","82"]
 
+    print(" ATLASCODE: " + atlasCode)
     # Check if code is allowed
     if atlasCode in allowedAtlasCodes:
-        return int(atlasCode)
+        return atlasCode
     else:
         print(" Disallowed atlascode skipped: " + atlasCode, end = " ")
         return None
