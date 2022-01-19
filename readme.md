@@ -62,6 +62,7 @@ Get updated observations and post to DW. This also depends on variables on Airfl
    * `&quality_grade=casual`
    * `&` for no filtering
    * `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate` # test with obscured  observations
+   * `place_id=165234` # Finland EEZ
 
 Use iNaturalist API documentation to see what kind of parameters you can give: https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
 
@@ -107,6 +108,7 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
     * private_place_guess
     * private_latitude
     * private_longitude
+* Check that there are no extra tabs at the end of lines - Pandas expects all rows to have exactly 6 columns
 * Save as .tsv (tab-separated) *with UTF-8*
 * Place file to dags/inaturalist/privatedata/latest.tsv
 
