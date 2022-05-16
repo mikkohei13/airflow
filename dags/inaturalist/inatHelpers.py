@@ -139,7 +139,11 @@ def convertTaxon(taxon):
   convert['Taraxacum officinale'] = "Taraxacum"
   convert['Alchemilla vulgaris'] = "Alchemilla"
   convert['Pteridium aquilinum'] = "Pteridium pinetorum"
+
+  # kevätleinikit/toukoleinikit
+  convert['Ranunculus cassubicus'] = "Ranunculus cassubicus -ryhmä"
   convert['Ranunculus auricomus'] = "Ranunculus auricomus -ryhmä s. lat."
+
   convert['Bombus lucorum-complex'] = "Bombus lucorum coll."
   convert['Chrysoperla carnea-group'] = "Chrysoperla"
   convert['Potentilla argentea'] = "Potentilla argentea -ryhmä"
@@ -151,6 +155,7 @@ def convertTaxon(taxon):
   convert['Monotropa'] = "Hypopitys"
   convert['Monotropa hypopitys'] = "Hypopitys monotropa" # kangasmäntykukka
   convert['Monotropa hypopitys ssp. hypophegea'] = "Hypopitys hypophegea" # kaljumäntykukka
+
 
   if not taxon: # Empty, False, Null/None
     return ""  
