@@ -96,11 +96,15 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 
 # Preparing private data
 
+Last time done: 7/2022
+
 * Download private data from https://inaturalist.laji.fi/sites/20
+* Import data to Excel, from file inaturalist-suomi-20-observations.csv
+   * Set observed_on field Data type = text 
 * Filter so that you have
    * coordinates_obscrued=TRUE
    * place_country_name = Finnish or Åland data
-   * has private_latitude and private_longitude
+   * private_latitude or private_longitude is not blank
 * Remove all columns except
     * id
     * observed_on
@@ -108,9 +112,21 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
     * private_place_guess
     * private_latitude
     * private_longitude
-* Check that there are no extra tabs at the end of lines - Pandas expects all rows to have exactly 6 columns
-* Save as .tsv (tab-separated) *with UTF-8*
+* Copy-paste the visible observation to another sheet
+* Check that there are no semicolons (;) in the data. If there are, replace them with something else.
+* Save that sheet as UTF-8 CSV
+* Edit the file with VS Code
+   * Check that there are no extra semicolons at the end of the rows . there often are on the *last row* (Pandas wants that all rows have exactly 6 columns)
+   * Remove empty rows at the bottom
+   * Replace semicolons with tabs
+* Change file extension to .tsv
 * Place file to dags/inaturalist/privatedata/latest.tsv
+* Test by running inat_manual on Airflow, without filters and with very recent data
+* Update all data by running inat_manual on Airflow, with filters:
+   * inat_MANUAL_production_latest_obsId = 0
+   * inat_MANUAL_production_latest_update = 2000-01-01T00%3A25%3A15%2B00%3A00
+   * inat_MANUAL_urlSuffix = &geoprivacy=obscured%2Cobscured_private%2Cprivate
+
 
 # Todo
 
