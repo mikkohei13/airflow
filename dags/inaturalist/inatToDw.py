@@ -617,7 +617,7 @@ def convertObservations(inatObservations, privateObservationData):
     # Store last converted observation
     lastUpdateKey = inat["id"]
 
-    print(" -> done " + str(inat["id"]))
+    print(" -> done ")
 
 
   # End for each observations

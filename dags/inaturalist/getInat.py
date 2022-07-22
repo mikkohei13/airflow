@@ -15,11 +15,12 @@ def getPageFromAPI(url):
   Args:
     url (string): API URL to get data from.
 
-  Raises:
-    Exception: API responds with code other than 200, or does not repond at all.
+#  Raises:
+#    Exception: API responds with code other than 200, or does not repond at all.
 
   Returns:
     orderedDictionary: Observatons and associated API metadata (paging etc.)
+    False: if iNat API responds with error code, or does not repond at all. 
   """
   print("Getting " + url)
   
@@ -34,12 +35,16 @@ def getPageFromAPI(url):
     print("iNaturalist API responded " + str(inatResponse.status_code))
   else:
     errorCode = str(inatResponse.status_code)
-    raise Exception(f"iNaturalist API responded with error {errorCode}")
+    print("iNaturalist responded with error " + errorCode)
+#    raise Exception(f"iNaturalist API responded with error {errorCode}")
+    return False
 
-  # TODO: create ordered dict. ALREADY DONE?
-  inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
-#  print(inatResponse.text)
-#  exit()
+  # Tries to convert JSON to dict. If iNat API gave invalid JSON, returns False instead.
+  try:
+    inatResponseDict = json.loads(inatResponse.text, object_pairs_hook=OrderedDict)
+  except:
+    print("iNaturalist responded with invalid JSON")
+    inatResponseDict = False
 
   return inatResponseDict
 
@@ -55,8 +60,8 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
     sleepSeconds (int):
     urlSuffix (string): Optional additional parameters for API request. Must start with "&".
 
-  Raises:
-    Exception: If getPageFromAPI() fails to fetch data.
+#  Raises:
+#    Exception: If getPageFromAPI() fails to fetch data.
 
   Returns:
     orderedDictionary: Yields observations and associated API metadata (paging etc.)
@@ -75,6 +80,10 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
       raise Exception("iNat API url malformed, contains space(s)")
 
     inatResponseDict = getPageFromAPI(url)
+    # TODO: If response is False, or JSON is invalid, wait and try again
+    if False == inatResponseDict:
+      time.sleep(10)
+      continue
 
     resultObservationCount = inatResponseDict["total_results"]
     print("Search matched " + str(resultObservationCount) + " observations.")
@@ -87,7 +96,6 @@ def getUpdatedGenerator(latestObsId, latestUpdateTime, pageLimit, perPage, sleep
     
     else:
       latestObsId = inatResponseDict["results"][-1]["id"]
-
       page = page + 1
   
       time.sleep(sleepSeconds) # TODO: Can this be after yield?
@@ -114,6 +122,7 @@ def getSingle(observationId):
 
   inatResponseDict = getPageFromAPI(url)
 
+  # TODO: Maybe handle error cases here as well (inatResponseDict is False), at least if this function is used in any automatic process.
   # When getting a single observation, zero results is an error
   if 0 == inatResponseDict["total_results"]:
     raise Exception(f"Zero results from iNaturalist API")
