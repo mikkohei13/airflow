@@ -253,9 +253,10 @@ def convertObservations(inatObservations, privateObservationData):
     unit['unitId'] = documentId + "-U"
 
     documentFacts.append({ "fact": "catalogueNumber", "value": inat['id']})
-    documentFacts.append({ "fact": "referenceURI", "value": inat['uri']})
+#    documentFacts.append({ "fact": "referenceURI", "value": inat['uri']}) # replaced with referenceURL
     keywords.append(str(inat['id'])) # id has to be string
 
+    publicDocument['referenceURL'] = inat['uri'] # ADDITION
 
     # Taxon
     # Special handling for heracleums, to get giant hogweed records
@@ -348,6 +349,8 @@ def convertObservations(inatObservations, privateObservationData):
       unit['media'] = []
       keywords.append("has_images") # Needed for combined photo & image search
       unitFacts.append({ "fact": "imageCount", "value": photoCount})
+      unit['externalMediaCount'] = photoCount # ADDITION
+
       arrImagesIncluded = False
 
       if photoCount > 4:
@@ -360,8 +363,15 @@ def convertObservations(inatObservations, privateObservationData):
         unitFacts.append({ "fact": "imageUrl", "value": "https://www.inaturalist.org/photos/" + photoId})
 
         # Photo
+        '''
+        What should be changed if we want to show arr-images on PAP?
+        - handle all photos here; no if/else
+        - at the end of this file, remove images without a license from th public document, and add keyword [keywords.append("image_arr")]
+        '''
+        # If photo has a CC-license
         if photo['photo']['license_code']:
           unit['media'].append(getImageData(photo, observer))
+        # If photo does not have a license, it's "all rights reserved" -> don't handle images
         else:
           arrImagesIncluded = True 
 
@@ -460,7 +470,7 @@ def convertObservations(inatObservations, privateObservationData):
     qualityMetricUnreliable = False
     if "quality_metrics" in inat:
       qualityMetricsSummary = summarizeQualityMetrics(inat["quality_metrics"])
-#      exit(qualityMetricsSummary) # debug ABBA
+#      exit(qualityMetricsSummary) # debug
 
       for metric, value in qualityMetricsSummary.items():
         # Add to facts
@@ -575,13 +585,12 @@ def convertObservations(inatObservations, privateObservationData):
 
     dw['publicDocument'] = publicDocument
 
-
     # -------------------------------------
     # Get private data for PAP
 
     # Adds privateDocument only if there is some private data
     if privateData:
-      # Makes a deep copy
+      # Makes a deep copy of the public document. After this, modifying the public document has no effect on private document.
       privateDocument = copy.deepcopy(publicDocument)
 
       privateDocument['concealment'] = "PRIVATE"
@@ -608,6 +617,8 @@ def convertObservations(inatObservations, privateObservationData):
 
       dw['privateDocument'] = privateDocument
 
+    # -------------------------------------
+    # Remove any private data from the public document
 
     # -------------------------------------
     # Finalize
