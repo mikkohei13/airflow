@@ -96,7 +96,7 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 
 # Preparing private data
 
-Last time done: 7/2022
+Last time done: 12/2022
 
 * Download private data from https://inaturalist.laji.fi/sites/20
 * Import data to Excel, from file inaturalist-suomi-20-observations.csv
@@ -113,14 +113,16 @@ Last time done: 7/2022
     * private_latitude
     * private_longitude
 * Copy-paste the visible observation to another sheet
-* Check that there are no semicolons (;) in the data. If there are, replace them with something else.
-* Save that sheet as UTF-8 CSV
+* Check that there are no semicolons (;) in the data. If there are (in place names), replace them with something else.
+* Save that sheet as Unicode text (it will be UTF-16)
 * Edit the file with VS Code
-   * Check that there are no extra semicolons at the end of the rows . there often are on the *last row* (Pandas wants that all rows have exactly 6 columns)
+   * Check that there are no extra semicolons at the end of the rows. There often are on the *last row* (Pandas wants that all rows have exactly 6 columns)
    * Remove empty rows at the bottom
    * Replace semicolons with tabs
+* Save the file as UTF-8
 * Change file extension to .tsv
-* Place file to dags/inaturalist/privatedata/latest.tsv
+* Place file to dags/inaturalist/privatedata/latest.tsv (remove or archive the old datafile(s) in that directory)
+* Double-check that Git does not see the file, by running git status
 * Test by running inat_manual on Airflow, without filters and with very recent data
 * Update all data by running inat_manual on Airflow, with filters:
    * inat_MANUAL_production_latest_obsId = 0
