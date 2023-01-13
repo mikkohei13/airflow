@@ -574,6 +574,11 @@ def convertObservations(inatObservations, privateObservationData):
     publicDocument['facts'] = documentFacts
     gathering['facts'] = gatheringFacts
     unit['facts'] = unitFacts
+
+    # Lowercase keywords
+    for word in range(len(keywords)):
+      keywords[word] = keywords[word].lower()
+
     publicDocument['keywords'] = keywords
 
 
@@ -595,7 +600,7 @@ def convertObservations(inatObservations, privateObservationData):
 
       privateDocument['concealment'] = "PRIVATE"
 
-      # keyword append privatedata
+      # append 'privatedata' tpo keywords
       privateDocument["keywords"].append("privatedata")
 
       if hasValue(privateData["observed_on"]):
