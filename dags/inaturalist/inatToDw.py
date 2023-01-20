@@ -463,8 +463,8 @@ def convertObservations(inatObservations, privateObservationData):
           unit['lifeStage'] = value
         elif "sex" == key:
           unit['sex'] = value
-
-
+        elif "dead" == key:
+          unit['dead'] = value # Todo: check that works
 
     # Quality metrics
     qualityMetricUnreliable = False

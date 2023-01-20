@@ -225,6 +225,12 @@ def summarizeAnnotation(annotation):
   elif 11 == value:
     key = "sex"
     value = "MALE"
+  elif 18 == value:
+    key = "dead"
+    value = False
+  elif 19 == value:
+    key = "dead"
+    value = True
   else:
     pass
 
