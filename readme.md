@@ -34,9 +34,9 @@ Tokens:
 Set up variables (Admin > Variables):
 
 * inat_auto_production_latest_obsId = 0
-* inat_auto_production_latest_update = 2023-01-01T00:00:00+00 
+* inat_auto_production_latest_update = 2023-02-01T00%3A00%3A00%2B00%3A00 (NOTE: no space allowed at the end of string)
 * inat_MANUAL_production_latest_obsId = 0
-* inat_MANUAL_production_latest_update = 2023-01-01T00:00:00+00 
+* inat_MANUAL_production_latest_update = 2023-02-01T00%3A00%3A00%2B00%3A00 
 * inat_MANUAL_urlSuffix = &captive=true 
 
 Upload latest.tsv to dags/inaturalist/privatedata, see instructions below.
@@ -156,6 +156,7 @@ Last time done: 12/2022
 - KNOWN ISSUES:
   - Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
     - https://github.com/docker/compose/pull/9019
+- Spaces in date variables will cause fatal error with iNat API -> should strip the string
 
 - MUST FOR PRODUCTION:
   - Test with own observation that API response stays the same 
