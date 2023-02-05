@@ -9,9 +9,12 @@ Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docke
 To set up:
 
     git clone https://github.com/mikkohei13/airflow.git
+    cd airflow
+    mkdir logs
     chmod -R 777 logs/
     chmod -R 777 dags/
     chmod -R 777 scripts/
+    mkdir dags/inaturalist/privatedata
 
 Set environment variables to `.env` or use default ones.
 
@@ -27,6 +30,18 @@ Tokens:
 
 * inat_production_token (for api.laji.fi)
 * inat_staging_token (for api)
+
+Set up variables (Admin > Variables):
+
+* inat_auto_production_latest_obsId = 0
+* inat_auto_production_latest_update = 2023-01-01T00:00:00+00 
+* inat_MANUAL_production_latest_obsId = 0
+* inat_MANUAL_production_latest_update = 2023-01-01T00:00:00+00 
+* inat_MANUAL_urlSuffix = &captive=true 
+
+Upload latest.tsv to dags/inaturalist/privatedata, see instructions below.
+
+## Test the setup
 
 To test the DAG in Airflow, enable and trigger it manually. 
 
@@ -95,13 +110,15 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
        * first id (set to 0)
        * start time (change this!)
 
-# Preparing private data
+# Preparing private data (latest.tsv)
 
 Last time done: 12/2022
 
 * Download private data from https://inaturalist.laji.fi/sites/20
 * Import data to Excel, from file inaturalist-suomi-20-observations.csv
-   * Set observed_on field Data type = text 
+   * Set File Origin charset as UTF-8
+   * Select Transform, and set observed_on field Data type = text
+   * Close and load
 * Filter so that you have
    * coordinates_obscrued=TRUE
    * place_country_name = Finnish or Åland data
