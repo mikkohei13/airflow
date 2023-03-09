@@ -26,11 +26,12 @@ def postSingle(dwObs, target):
 
   if 200 == targetResponse.status_code:
     print("DW API responded " + str(targetResponse.status_code))
+#    print(targetResponse.text) # DEBUG
     return True
 
   else:
     errorCode = str(targetResponse.status_code)
-    print(targetResponse.text)
+#    print(targetResponse.text) # DEBUG
     raise Exception(f"DW API responded with error {errorCode}")
 
 

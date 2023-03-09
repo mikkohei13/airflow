@@ -335,7 +335,7 @@ def convertObservations(inatObservations, privateObservationData):
     # Locality
     # Locality name used to be reversed, but not needed really?
     gathering['locality'] = inat['place_guess']
-    gathering['country'] = "Finland" # NOTE: This expects that only Finnish observations are fecthed
+    gathering['country'] = "" # Finland removed as country, so that fixing observations outside Finland is possible. iNaturalist does not have dedicated country field, country name is sometimes included on the place_guess field.
 
 
     # Tags

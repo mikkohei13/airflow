@@ -150,6 +150,12 @@ Last time done: 12/2022
 
 # Todo
 
+- Issue: If location of an observation is first set to Finlanf, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
+    - Solution options:
+        - 1-2 timer per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland.
+        - Manually fix observations with annotations
+
+
 - TRY OUT:
   - restart: unless-stopped
 
