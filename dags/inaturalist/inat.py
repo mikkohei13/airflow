@@ -1,5 +1,4 @@
-import json
-import requests
+
 import datetime
 import sys
 import time
@@ -8,6 +7,7 @@ from airflow.models import Variable
 
 import getInat
 import inatToDw
+import inatHelpers
 import postDw
 
 import pandas
@@ -19,6 +19,7 @@ import pandas
 # Temp helper
 def printObject(object):
   print(object.__dict__)
+
 
 # TODO: This is not used yet. Use or remove?
 def getAirflowVariable(variableName):
@@ -79,10 +80,13 @@ mode = sys.argv[2] # auto | manual
 
 # Load private data
 # TODO: can we avoid root paths, to be able to run this from command line also?
+# TODO: Move to helpers, load original table like with emails?
 print("Loading private data")
 privateObservationData = pandas.read_csv("/opt/airflow/dags/inaturalist/privatedata/latest.tsv", sep='\t') 
 rowCount = len(privateObservationData.index)
 print("Loaded " + str(rowCount) + " rows")
+
+private_emails = inatHelpers.load_private_emails()
 
 
 """
@@ -143,7 +147,7 @@ for multiObservationDict in getInat.getUpdatedGenerator(AirflowLatestObsId, Airf
     break
 
   # CONVERT
-  dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'], privateObservationData)
+  dwObservations, latestObsId = inatToDw.convertObservations(multiObservationDict['results'], privateObservationData, private_emails)
 
   # POST
   # TODO: set production vs staging

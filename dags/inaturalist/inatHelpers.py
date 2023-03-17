@@ -1,5 +1,7 @@
 
 import math
+import re
+import pandas
 
 """
 def appendFact(factsList, factLabel, factValue = False):
@@ -8,6 +10,39 @@ def appendFact(factsList, factLabel, factValue = False):
 
   return factsList
 """
+
+
+# Define email validation function
+def is_valid_email(email):
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(pattern, email))
+
+
+# Define function to check if a string is empty or starts with a space
+def is_valid_string(s):
+  return bool(s) and not s.startswith(' ')
+
+
+def load_private_emails():
+  print("Loading private emails")
+  private_user_data = pandas.read_csv("/opt/airflow/dags/inaturalist/privatedata/inaturalist-suomi-20-users.csv", sep=',') 
+
+#  print(f"Loaded { len(private_user_data.index) } rows")
+
+  # Ensure both 'login' and 'email' are strings
+  private_user_data['login'] = private_user_data['login'].astype(str)
+  private_user_data['email'] = private_user_data['email'].astype(str)
+
+  # Filter rows with valid email addresses and non-empty logins
+  filtered_df = private_user_data[private_user_data['email'].apply(is_valid_email) & private_user_data['login'].apply(is_valid_string)]
+
+  # Select columns and create a dictionary
+  private_user_emails = filtered_df[['login', 'email']].set_index('login')['email'].to_dict()
+
+  print(f"Loaded { len(private_user_emails) } email addresses")
+
+  return private_user_emails
+
 
 # Extracts and validates atlascode from text string
 # Returns None if no valid atlascode found

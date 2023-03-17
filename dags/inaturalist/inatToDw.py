@@ -31,6 +31,9 @@ DW data features:
 - Fields can be left blank
 - Enum values are ALL-CAPS
 
+Note:
+- If an observation moified that it become private, the private coordinates will go to private DW only after next data dump form iNaturalist, since public observations are removed from the private data file (to speed up the system)
+
 """
 
 
@@ -150,7 +153,7 @@ def hasValue(val):
     return False
 
 
-def convertObservations(inatObservations, privateObservationData):
+def convertObservations(inatObservations, privateObservationData, private_emails):
   """Convert observations from iNat to FinBIF DW format.
 
   Args:
@@ -178,12 +181,21 @@ def convertObservations(inatObservations, privateObservationData):
     privateData = privateObservationData.loc[privateObservationData['id'] == inat["id"]]
     privateData = privateData.to_dict(orient='records')
 
+    logSuffix = ""
+
+    has_private_data = False
     if privateData:
-      logSuffix = " has private data"
+      has_private_data = True
+      logSuffix = logSuffix + " has private data"
       privateData = privateData[0]
-    else:
-      logSuffix = ""
-      privateData = None
+
+    # Get private emails
+    has_private_email = False
+    if inat['user']['login'] in private_emails:
+      has_private_email = True
+      private_email = private_emails[inat['user']['login']]
+      logSuffix = logSuffix + " has private email"
+
 
     print("Converting obs " + str(inat["id"]), end = logSuffix)
 
@@ -594,32 +606,42 @@ def convertObservations(inatObservations, privateObservationData):
     # Get private data for PAP
 
     # Adds privateDocument only if there is some private data
-    if privateData:
+    if has_private_data or has_private_email:
       # Makes a deep copy of the public document. After this, modifying the public document has no effect on private document.
       privateDocument = copy.deepcopy(publicDocument)
 
       privateDocument['concealment'] = "PRIVATE"
 
-      # append 'privatedata' tpo keywords
+      # Append 'privatedata' to keywords
       privateDocument["keywords"].append("privatedata")
 
-      if hasValue(privateData["observed_on"]):
-        privateDocument["gatherings"][0]["eventDate"]["begin"] = privateData["observed_on"]
-        privateDocument["gatherings"][0]["eventDate"]["end"] = privateData["observed_on"]
+      # Handle private location and date
+      if has_private_data:
+        # Add private date
+        if hasValue(privateData["observed_on"]):
+          privateDocument["gatherings"][0]["eventDate"]["begin"] = privateData["observed_on"]
+          privateDocument["gatherings"][0]["eventDate"]["end"] = privateData["observed_on"]
 
-      if inat['mappable']:
-        if hasValue(privateData["private_longitude"]):        
-          privateDocument["gatherings"][0]["coordinates"]["lonMin"] = privateData["private_longitude"]
-          privateDocument["gatherings"][0]["coordinates"]["lonMax"] = privateData["private_longitude"]
-          privateDocument["gatherings"][0]["coordinates"]["latMin"] = privateData["private_latitude"]
-          privateDocument["gatherings"][0]["coordinates"]["latMax"] = privateData["private_latitude"]
+        # Add private coordinates
+        if inat['mappable']:
+          if hasValue(privateData["private_longitude"]):        
+            privateDocument["gatherings"][0]["coordinates"]["lonMin"] = privateData["private_longitude"]
+            privateDocument["gatherings"][0]["coordinates"]["lonMax"] = privateData["private_longitude"]
+            privateDocument["gatherings"][0]["coordinates"]["latMin"] = privateData["private_latitude"]
+            privateDocument["gatherings"][0]["coordinates"]["latMax"] = privateData["private_latitude"]
 
-        if hasValue(privateData["positional_accuracy"]):
-          privateDocument["gatherings"][0]["coordinates"]["accuracyInMeters"] = privateData["positional_accuracy"]
-        
-      if hasValue(privateData["private_place_guess"]):
-        privateDocument["gatherings"][0]["locality"] = privateData["private_place_guess"]
+          if hasValue(privateData["positional_accuracy"]):
+            privateDocument["gatherings"][0]["coordinates"]["accuracyInMeters"] = privateData["positional_accuracy"]
+          
+        # Add private location name
+        if hasValue(privateData["private_place_guess"]):
+          privateDocument["gatherings"][0]["locality"] = privateData["private_place_guess"]
 
+      # Handle private email
+      if has_private_email:
+        # Add private email
+        privateDocument["gatherings"][0]['facts'].append({ "fact": "email", "value": private_email })
+      
       dw['privateDocument'] = privateDocument
 
     # -------------------------------------

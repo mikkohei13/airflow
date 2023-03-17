@@ -7,9 +7,9 @@ import inatToDw
 import postDw
 
 import json
-
 import pandas
 
+import inatHelpers
 
 """
 Test observations
@@ -37,12 +37,12 @@ target = sys.argv[2] # dry | production
 
 # Load private data
 privateObservationData = pandas.read_csv("privatedata/latest.tsv", sep='\t')
-
+private_emails = inatHelpers.load_private_emails()
 
 # Get and transform data
 singleObservationDict = getInat.getSingle(id)
 
-dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'], privateObservationData)
+dwObservation, lastUpdateKey = inatToDw.convertObservations(singleObservationDict['results'], privateObservationData, private_emails)
 
 #print("TEMP DEBUG lastUpdateKey: " + str(lastUpdateKey))
 
