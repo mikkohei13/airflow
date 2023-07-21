@@ -426,6 +426,9 @@ def convertObservations(inatObservations, privateObservationData, private_emails
         abundanceString = val['value_ci']
       if "Lintuatlas, pesimävarmuusindeksi" == val['name_ci']:
         atlasCode = inatHelpers.extractAtlasCode("atl:" + val['value_ci'])
+      if "Host plant" == val['name_ci'] or "Host" == val['name_ci'] or "Isäntälaji" == val['name_ci'] or "Host" == val['name_ci']:
+        if "taxon" in val:
+          unitFacts.append({ "fact": "http://tun.fi/MY.hostInformalNameString", "value": val["taxon"]["name"]})
 
     unit['abundanceString'] = abundanceString
 

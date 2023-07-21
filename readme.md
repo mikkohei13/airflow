@@ -79,6 +79,9 @@ Get updated observations and post to DW. This also depends on variables on Airfl
    * `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate` # test with obscured  observations
    * `&place_id=165234` # Finland EEZ
    * `&term_id=17&term_value_id=19` # with attribute dead (not necessarily upvoted?)
+   * `&field:Host` # Observation field regardless of value
+   * `&field:Host%20plant`
+   * `&field:Isäntälaji`
 
 Use iNaturalist API documentation to see what kind of parameters you can give: https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
 
