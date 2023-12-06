@@ -113,47 +113,24 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
        * first id (set to 0)
        * start time (change this!)
 
-# Preparing private data (latest.tsv)
-
-Last time done: 12/2022
+# Preparing private data
 
 * Download private data from https://inaturalist.laji.fi/sites/20
-* Import data to Excel, from file inaturalist-suomi-20-observations.csv
-   * Set File Origin charset as UTF-8
-   * Select Transform, and set observed_on field Data type = text
-   * Close and load
-* Filter so that you have
-   * coordinates_obscrued=TRUE
-   * place_country_name = Finnish or Åland data
-   * private_latitude or private_longitude is not blank
-* Remove all columns except
-    * id
-    * observed_on
-    * positional_accuracy
-    * private_place_guess
-    * private_latitude
-    * private_longitude
-* Copy-paste the visible observation to another sheet
-* Check that there are no semicolons (;) in the data. If there are (in place names), replace them with something else.
-* Save that sheet as Unicode text (it will be UTF-16)
-* Edit the file with VS Code
-   * Check that there are no extra semicolons at the end of the rows. There often are on the *last row* (Pandas wants that all rows have exactly 6 columns)
-   * Remove empty rows at the bottom
-   * Replace semicolons with tabs
-* Save the file as UTF-8
-* Change file extension to .tsv
-* Place file to dags/inaturalist/privatedata/latest.tsv (remove or archive the old datafile(s) in that directory)
-* Double-check that Git does not see the file, by running git status
-* Test by running inat_manual on Airflow, without filters and with very recent data
+* Unzip the data
+* Run script `tools/simplify.py` for the `inaturalist-suomi-20-observations.csv` file
+* Place the resulting `latest.tsv` file to `dags/inaturalist/privatedata/latest.tsv` (remove or archive the old datafile(s) in that directory)
+* Place `inaturalist-suomi-20-users.csv`
+* Double-check that Git doesn't see the files, by running `git status`
+* (Test by running inat_manual on Airflow, without filters and with very recent data
 * Update all data by running inat_manual on Airflow, with filters:
    * inat_MANUAL_production_latest_obsId = 0
    * inat_MANUAL_production_latest_update = 2000-01-01T00%3A25%3A15%2B00%3A00
    * inat_MANUAL_urlSuffix = &geoprivacy=obscured%2Cobscured_private%2Cprivate
-
+* Note that this doesn't update all observations with email addresses. Doing that would require updating all observations.
 
 # Todo
 
-- Issue: If location of an observation is first set to Finlanf, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
+- Issue: If location of an observation is first set to Finland, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
     - Solution options:
         - 1-2 timer per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland.
         - Manually fix observations with annotations
