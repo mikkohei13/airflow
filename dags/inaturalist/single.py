@@ -37,6 +37,12 @@ target = sys.argv[2] # dry | production
 
 # Load private data
 privateObservationData = pandas.read_csv("privatedata/latest.tsv", sep='\t')
+
+# Exclude the last row if it is empty
+# Check if the last row is indeed empty
+if privateObservationData.iloc[-1].isnull().all():
+  privateObservationData = privateObservationData.iloc[:-1]
+
 private_emails = inatHelpers.load_private_emails()
 
 # Get and transform data

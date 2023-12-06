@@ -83,6 +83,12 @@ mode = sys.argv[2] # auto | manual
 # TODO: Move to helpers, load original table like with emails?
 print("Loading private data")
 privateObservationData = pandas.read_csv("/opt/airflow/dags/inaturalist/privatedata/latest.tsv", sep='\t') 
+
+# Exclude the last row if it is empty
+# Check if the last row is indeed empty
+if privateObservationData.iloc[-1].isnull().all():
+  privateObservationData = privateObservationData.iloc[:-1]
+
 rowCount = len(privateObservationData.index)
 print("Loaded " + str(rowCount) + " rows")
 

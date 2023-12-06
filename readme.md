@@ -67,6 +67,7 @@ Get updated observations and post to DW. This also depends on variables on Airfl
 * inat_MANUAL_production_latest_update
 * inat_MANUAL_urlSuffix
 * Example suffixes:
+   * `&` for no filtering
    * `&captive=true`
    * `&quality_grade=casual`
    * `&user_id=username`
@@ -75,7 +76,6 @@ Get updated observations and post to DW. This also depends on variables on Airfl
    * `&taxon_name=Parus%20major` # only this taxon, not children, use %20 for spaces
    * `&taxon_id=211194` # Tracheophyta; this taxon and children
    * `&quality_grade=casual`
-   * `&` for no filtering
    * `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate` # test with obscured  observations
    * `&place_id=165234` # Finland EEZ
    * `&term_id=17&term_value_id=19` # with attribute dead (not necessarily upvoted?)
