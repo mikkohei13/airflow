@@ -129,9 +129,11 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 
 ### Issues:
 
+- Delay on observation becoming visible on iNat API. If user adds observation at 11.59, it's not necessarily available at 12.00, so it's excluded. Then when the script is run at 12.30, it will fetch observations since 12.00, so the observation is excluded again.
+    - Solution: subtract few minutes from last update time, e.g. make 12.00 -> 11.55. 
 - Deletions
 - If location of an observation is first set to Finland, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
-    - Solution options: Twice per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland -> Delete from DW: Check: data dump should contain all Finnish observations, regardless of user affiliation.
+    - Solution: Twice per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland -> Delete from DW: Check: data dump should contain all Finnish observations, regardless of user affiliation.
 - Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
 - https://github.com/docker/compose/pull/9019
 - Spaces in date variables will cause fatal error with iNat API -> should strip the string
