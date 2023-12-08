@@ -2,8 +2,6 @@
 
 Started 29.9.2020, put into production 1.11.2020.
 
-Based on https://towardsdatascience.com/apache-airflow-and-postgresql-with-docker-and-docker-compose-5651766dfa96
-
 # Setup
 
 To set up:
@@ -75,7 +73,6 @@ Get updated observations and post to DW. This also depends on variables on Airfl
    * `&photo_licensed=true`
    * `&taxon_name=Parus%20major` # only this taxon, not children, use %20 for spaces
    * `&taxon_id=211194` # Tracheophyta; this taxon and children
-   * `&quality_grade=casual`
    * `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate` # test with obscured  observations
    * `&place_id=165234` # Finland EEZ
    * `&term_id=17&term_value_id=19` # with attribute dead (not necessarily upvoted?)
@@ -121,52 +118,40 @@ Use iNaturalist API documentation to see what kind of parameters you can give: h
 * Place the resulting `latest.tsv` file to `dags/inaturalist/privatedata/latest.tsv` (remove or archive the old datafile(s) in that directory)
 * Place `inaturalist-suomi-20-users.csv`
 * Double-check that Git doesn't see the files, by running `git status`
-* (Test by running inat_manual on Airflow, without filters and with very recent data
+* Test by running inat_manual on Airflow, with `&user_id=mikkohei13&geoprivacy=obscured%2Cobscured_private%2Cprivate`
 * Update all data by running inat_manual on Airflow, with filters:
-   * inat_MANUAL_production_latest_obsId = 0
-   * inat_MANUAL_production_latest_update = 2000-01-01T00%3A25%3A15%2B00%3A00
-   * inat_MANUAL_urlSuffix = &geoprivacy=obscured%2Cobscured_private%2Cprivate
+   * `inat_MANUAL_production_latest_obsId = 0`
+   * `inat_MANUAL_production_latest_update = 2000-01-01T00%3A25%3A15%2B00%3A00`
+   * `inat_MANUAL_urlSuffix = &geoprivacy=obscured%2Cobscured_private%2Cprivate`
 * Note that this doesn't update all observations with email addresses. Doing that would require updating all observations.
 
 # Todo
 
-- Issue: If location of an observation is first set to Finland, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
-    - Solution options:
-        - 1-2 timer per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland.
-        - Manually fix observations with annotations
+### Issues:
 
-
-- TRY OUT:
-  - restart: unless-stopped
-
-- KNOWN ISSUES:
-  - Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
-    - https://github.com/docker/compose/pull/9019
+- Deletions
+- If location of an observation is first set to Finland, then copied to DW, then location is changed on iNaturalist to some other country, changes won't come to DW, since he system only fetches Finnish observations.
+    - Solution options: Twice per year, check all occurrences against Finnish data dump. If observation is not found, it's deleted or moved outside Finland -> Delete from DW: Check: data dump should contain all Finnish observations, regardless of user affiliation.
+- Does to docker-compose bug, does not gracefully stop, if `restart: always` is set
+- https://github.com/docker/compose/pull/9019
 - Spaces in date variables will cause fatal error with iNat API -> should strip the string
 
-- MUST FOR PRODUCTION:
-  - Test with own observation that API response stays the same 
-  - Send email on failure
-  - Setup proper env values, password-protect webserver ui https://airflow.apache.org/docs/stable/security.html
-  - Limit DAG refresh time (now ~3 secs)
-  - Log cleanup https://github.com/teamclairvoyant/airflow-maintenance-dags/tree/master/log-cleanup
-  - Fix date created timezone
+### For server setup:
 
-- SHOULD:
-  - Log level setup https://github.com/apache/airflow/pull/2191
-  - iNat: Setup delete command
-  - iNat: Setup (unit) testing
-  - Monitor if iNat API changes (test observation)
-  - Setup & test email notifications
+- Send email on failure
+- Setup proper env values, password-protect webserver ui https://airflow.apache.org/docs/stable/security.html
+- Limit DAG refresh time (now ~3 secs)
 
-- NICE:
-  - Set processor_poll_interval to e.g. 15 secs
-  - Conversion: annotation key 17 (inatHelpers)
-  - Conversion: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
-  - Conversion: See todo's from conversion script
-  - Store original observations from inat, where?
+### Should/Nice to have:
 
-- ASK: Why dev.laji.fi does not seem to update all observations? (Slack with Esko)
+- Fix date created timezone
+- iNat: Setup (unit) testing
+- Monitor if iNat API changes (test observation)
+- Set processor_poll_interval to e.g. 15 secs
+- Conversion: annotation key 17 (inatHelpers)
+- Conversion: Remove spaces, special chars etc. from fact names, esp. when handling observation fields
+- Conversion: See todo's from conversion script
+
 
 # Testing
 
@@ -193,11 +178,5 @@ Prints the hierarchy of tasks in the tutorial DAG
 - Laji.fi hides non-wild observations by default
 - Laji.fi hides observations that have issues, or have been annotated as erroneous
 - Laji.fi obscures certain sensitive species, which then cannot be found using all filters
-- ETL process and annotations can change e.g. taxon, so that the observation cannot be found with the original name
+- Taxonomy issues. ETL process and annotations can change e.g. taxon, so that the observation cannot be found with the original name
 - If observation has first been private or captive, and then changed to public or non-captive, it may not be copied by the regular copy process
-
-
-# Reading
-
-https://www.astronomer.io/blog/7-common-errors-to-check-when-debugging-airflow-dag/
-
