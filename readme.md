@@ -1,6 +1,7 @@
 
+## NOTE: Replaced with a private repository https://github.com/luomus/inaturalist-etl
 
-Started 29.9.2020, put into production 1.11.2020.
+Started 29.9.2020, put into production 1.11.2020, retired 27.12.2023.
 
 # Setup
 
